@@ -2,7 +2,8 @@
 
 var PHOTO_NUMBER = 25;
 var AVATAR_NUMBER = 6;
-var MAX_COMMENTS = 5;
+var MAX_COMMENTS = 100;
+var VISIBLE_COMMENTS = 5;
 
 var commentExamples = [
   'Всё отлично!',
@@ -50,6 +51,45 @@ var generatePhotoDescription = function () {
   return photos;
 };
 
+/* Функция отрисовки большого изображения */
+var showBigPicture = function (photo) {
+
+  var bigPictureElement = document.querySelector('.big-picture');
+  var commentsList = document.querySelector('.social__comments');
+  var commentElement = commentsList.querySelector('.social__comment');
+  bigPictureElement.classList.remove('hidden');
+
+  /* Заполняем элемент контентом */
+  bigPictureElement.querySelector('.big-picture__img img').src = photo.url;
+  bigPictureElement.querySelector('.likes-count').textContent = photo.likes;
+  bigPictureElement.querySelector('.comments-count').textContent = photo.comments.length;
+  bigPictureElement.querySelector('.social__caption').textContent = photo.description;
+
+  var fragment = document.createDocumentFragment();
+
+  for (var i = 0; i < VISIBLE_COMMENTS; i++) {
+    var comment = commentElement.cloneNode(true);
+
+    comment.querySelector('.social__picture').src = photo.comments[i].avatar;
+    comment.querySelector('.social__picture').alt = photo.comments[i].name;
+    comment.querySelector('.social__text').textContent = photo.comments[i].message;
+
+    fragment.appendChild(comment);
+  }
+
+  /* Удаляем элементы по умолчанию */
+  var children = commentsList.children;
+
+  for (i = children.length - 1; i >= 0; i--) {
+    commentsList.removeChild(children[i]);
+  }
+
+  commentsList.appendChild(fragment);
+
+  bigPictureElement.querySelector('.social__comment-count').classList.add('visually-hidden');
+  bigPictureElement.querySelector('.comments-loader').classList.add('visually-hidden');
+};
+
 /* Функция отрисовки фотографий на странице */
 var renderPhoto = function () {
 
@@ -74,6 +114,8 @@ var renderPhoto = function () {
 
     fragment.appendChild(picture);
   }
+
+  showBigPicture(photos[0]);
 
   /* Присоединяем готовый фрагмент к блоку picture */
   pictureBlock.appendChild(fragment);
