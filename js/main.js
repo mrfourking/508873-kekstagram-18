@@ -5,6 +5,16 @@ var AVATAR_NUMBER = 6;
 var MAX_COMMENTS = 100;
 var VISIBLE_COMMENTS = 5;
 
+var bigPictureElement = document.querySelector('.big-picture');
+var commentsList = document.querySelector('.social__comments');
+var commentElement = commentsList.querySelector('.social__comment');
+
+/* Инициализируем блок для заполнения и шаблон */
+var pictureBlock = document.querySelector('.pictures');
+var pictureTemplate = document.querySelector('#picture')
+  .content
+  .querySelector('.picture');
+
 var commentExamples = [
   'Всё отлично!',
   'В целом всё неплохо. Но не всё.',
@@ -53,10 +63,6 @@ var generatePhotoDescription = function () {
 
 /* Функция отрисовки большого изображения */
 var showBigPicture = function (photo) {
-
-  var bigPictureElement = document.querySelector('.big-picture');
-  var commentsList = document.querySelector('.social__comments');
-  var commentElement = commentsList.querySelector('.social__comment');
   bigPictureElement.classList.remove('hidden');
 
   /* Заполняем элемент контентом */
@@ -92,13 +98,6 @@ var showBigPicture = function (photo) {
 
 /* Функция отрисовки фотографий на странице */
 var renderPhoto = function () {
-
-  /* Инициализируем блок для заполнения и шаблон */
-  var pictureBlock = document.querySelector('.pictures');
-  var pictureTemplate = document.querySelector('#picture')
-    .content
-    .querySelector('.picture');
-
   var photos = generatePhotoDescription();
 
   var fragment = document.createDocumentFragment();
