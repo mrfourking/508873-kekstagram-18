@@ -4,16 +4,21 @@ var PHOTO_NUMBER = 25;
 var AVATAR_NUMBER = 6;
 var MAX_COMMENTS = 100;
 var VISIBLE_COMMENTS = 5;
-
-var bigPictureElement = document.querySelector('.big-picture');
-var commentsList = document.querySelector('.social__comments');
-var commentElement = commentsList.querySelector('.social__comment');
+var ESC_KEYCODE = 27;
 
 /* Инициализируем блок для заполнения и шаблон */
 var pictureBlock = document.querySelector('.pictures');
 var pictureTemplate = document.querySelector('#picture')
   .content
   .querySelector('.picture');
+
+var bigPictureElement = document.querySelector('.big-picture');
+var commentsList = document.querySelector('.social__comments');
+var commentElement = commentsList.querySelector('.social__comment');
+
+var uploadFile = pictureBlock.querySelector('#upload-file');
+var uploadFileForm = pictureBlock.querySelector('.img-upload__overlay');
+var editCloseButton = pictureBlock.querySelector('#upload-cancel');
 
 var commentExamples = [
   'Всё отлично!',
@@ -63,7 +68,7 @@ var generatePhotoDescription = function () {
 
 /* Функция отрисовки большого изображения */
 var showBigPicture = function (photo) {
-  bigPictureElement.classList.remove('hidden');
+  // bigPictureElement.classList.remove('hidden');
 
   /* Заполняем элемент контентом */
   bigPictureElement.querySelector('.big-picture__img img').src = photo.url;
@@ -119,5 +124,30 @@ var renderPhoto = function () {
   /* Присоединяем готовый фрагмент к блоку picture */
   pictureBlock.appendChild(fragment);
 };
+
+var onEscCloseForm = function (evt) {
+  if (evt.keyCode === ESC_KEYCODE) {
+    uploadFileForm.classList.add('hidden');
+  }
+};
+
+var openEditForm = function () {
+  uploadFileForm.classList.remove('hidden');
+  document.addEventListener('keydown', onEscCloseForm);
+};
+
+var closeEditForm = function () {
+  uploadFileForm.classList.add('hidden');
+  document.removeEventListener('keydown', onEscCloseForm);
+  uploadFile.value = '';
+};
+
+uploadFile.addEventListener('change', function () {
+  openEditForm();
+});
+
+editCloseButton.addEventListener('click', function () {
+  closeEditForm();
+});
 
 renderPhoto();
