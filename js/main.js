@@ -5,8 +5,11 @@ var AVATAR_NUMBER = 6;
 var MAX_COMMENTS = 100;
 var VISIBLE_COMMENTS = 5;
 var ESC_KEYCODE = 27;
+var SCALE_STEP = 25;
+var MIN_SCALE = 25;
+var MAX_SCALE = 100;
 
-/* Инициализируем блок для заполнения и шаблон */
+/* Инициализация блока для заполнения и шаблона */
 var pictureBlock = document.querySelector('.pictures');
 var pictureTemplate = document.querySelector('#picture')
   .content
@@ -16,9 +19,16 @@ var bigPictureElement = document.querySelector('.big-picture');
 var commentsList = document.querySelector('.social__comments');
 var commentElement = commentsList.querySelector('.social__comment');
 
+/* Инициализация формы загрузки изображения */
 var uploadFile = pictureBlock.querySelector('#upload-file');
 var uploadFileForm = pictureBlock.querySelector('.img-upload__overlay');
-var editCloseButton = pictureBlock.querySelector('#upload-cancel');
+var editCloseButton = uploadFileForm.querySelector('#upload-cancel');
+var imagePreview = uploadFileForm.querySelector('.img-upload__preview img');
+
+/* Инициализация элементов масштабирования изображения */
+var smallerScaleButton = uploadFileForm.querySelector('.scale__control--smaller');
+var biggerScaleButton = uploadFileForm.querySelector('.scale__control--bigger');
+var scaleField = uploadFileForm.querySelector('.scale__control--value');
 
 var commentExamples = [
   'Всё отлично!',
@@ -107,8 +117,8 @@ var renderPhoto = function () {
 
   var fragment = document.createDocumentFragment();
 
-  /* Клонируем содержимое шаблона, добавляем данные из массива объектов
-     и записываем получившийся блок во фрагмент */
+  /* Клонируем содержимое шаблона, добавляем данные из массива
+    объектов и записываем получившийся блок во фрагмент */
   for (var i = 0; i < photos.length; i++) {
     var picture = pictureTemplate.cloneNode(true);
 
@@ -125,6 +135,7 @@ var renderPhoto = function () {
   pictureBlock.appendChild(fragment);
 };
 
+/* Функции открытия/закрытия формы загрузки изображений */
 var onEscCloseForm = function (evt) {
   if (evt.keyCode === ESC_KEYCODE) {
     uploadFileForm.classList.add('hidden');
@@ -142,12 +153,40 @@ var closeEditForm = function () {
   uploadFile.value = '';
 };
 
+/* Функция масштабирования изображения */
+var setImageScale = function (positiveFlag) {
+  var currentScale = Number.parseInt(scaleField.value, 10);
+
+  if (positiveFlag && (currentScale + SCALE_STEP) <= MAX_SCALE) {
+    scaleField.value = (currentScale + SCALE_STEP) + '%';
+    imagePreview.style.transform = 'scale(' + (currentScale + SCALE_STEP) / 100 + ')';
+  } else {
+    if (!positiveFlag && (currentScale - SCALE_STEP) >= MIN_SCALE) {
+      scaleField.value = (currentScale - SCALE_STEP) + '%';
+      imagePreview.style.transform = 'scale(' + (currentScale - SCALE_STEP) / 100 + ')';
+    }
+  }
+};
+
+/* Обработчики событий открытия/закрытия
+  формы загрузки изображений */
 uploadFile.addEventListener('change', function () {
   openEditForm();
 });
 
 editCloseButton.addEventListener('click', function () {
   closeEditForm();
+});
+
+/* Обработчики кнопок масштабирования изображения */
+smallerScaleButton.addEventListener('click', function () {
+  var positiveFlag = false;
+  setImageScale(positiveFlag);
+});
+
+biggerScaleButton.addEventListener('click', function () {
+  var positiveFlag = true;
+  setImageScale(positiveFlag);
 });
 
 renderPhoto();
