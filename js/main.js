@@ -30,6 +30,14 @@ var smallerScaleButton = uploadFileForm.querySelector('.scale__control--smaller'
 var biggerScaleButton = uploadFileForm.querySelector('.scale__control--bigger');
 var scaleField = uploadFileForm.querySelector('.scale__control--value');
 
+/* Инициализация элементов с фильтрами */
+var effectButtons = uploadFileForm.querySelectorAll('.effects__radio');
+var effectLevel = uploadFileForm.querySelector('.effect-level');
+var effectInput = effectLevel.querySelector('.effect-level__value');
+var effectlevelBar = effectLevel.querySelector('.effect-level__line');
+var effectLevelButton = effectLevel.querySelector('.effect-level__pin');
+var currentEffect;
+
 var commentExamples = [
   'Всё отлично!',
   'В целом всё неплохо. Но не всё.',
@@ -41,12 +49,21 @@ var commentExamples = [
 
 var names = ['Артем', 'Мария', 'Виталий', 'Кекс', 'Прохор', 'Анастасия'];
 
-/*  Функция генерации случайного целого числа в заданном диапазоне */
+/**
+ * Функция генерации случайного целого числа в заданном диапазоне
+ * @param {number} min - нижняя граница диапазона
+ * @param {number} max - верхняя граница диапазона
+ * @return {number} случайное число из заданного диапазона
+*/
 var getRandomElement = function (min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 };
 
-/* Функция генерации массива комментариев */
+/**
+ * Функция генерации массива комментариев
+ * @param {number} commentsNumber - число комментариев
+ * @return {array} массив объектов с коммментариями
+ */
 var generateComments = function (commentsNumber) {
   var comments = [];
 
@@ -61,7 +78,10 @@ var generateComments = function (commentsNumber) {
   return comments;
 };
 
-/* Функция генерации массива объектов с описанием фотографий */
+/**
+ * Функция генерации массива объектов с описанием фотографий
+ * @return {array} массив объектов с фотографиями
+ */
 var generatePhotoDescription = function () {
   var photos = [];
   for (var i = 0; i < PHOTO_NUMBER; i++) {
@@ -76,7 +96,10 @@ var generatePhotoDescription = function () {
   return photos;
 };
 
-/* Функция отрисовки большого изображения */
+/**
+ * Функция отрисовки большого изображения
+ * @param {object} photo - объект с полями информации о большой фотографии
+ */
 var showBigPicture = function (photo) {
   // bigPictureElement.classList.remove('hidden');
 
@@ -111,7 +134,9 @@ var showBigPicture = function (photo) {
   bigPictureElement.querySelector('.comments-loader').classList.add('visually-hidden');
 };
 
-/* Функция отрисовки фотографий на странице */
+/**
+ * Функция отрисовки фотографий на странице
+ */
 var renderPhoto = function () {
   var photos = generatePhotoDescription();
 
@@ -135,25 +160,39 @@ var renderPhoto = function () {
   pictureBlock.appendChild(fragment);
 };
 
-/* Функции открытия/закрытия формы загрузки изображений */
+/**
+ * Функция закрытия формы загрузки изображений по нажатию на Esc
+ * @param {object} evt - объект Event
+ */
 var onEscCloseForm = function (evt) {
   if (evt.keyCode === ESC_KEYCODE) {
     uploadFileForm.classList.add('hidden');
   }
 };
 
+/**
+ * Функция открытия формы загрузки изображений
+ * @param {object} evt - объект Event
+ */
 var openEditForm = function () {
   uploadFileForm.classList.remove('hidden');
   document.addEventListener('keydown', onEscCloseForm);
 };
 
+/**
+ * Функция закрытия формы загрузки изображений
+ * @param {object} evt - объект Event
+ */
 var closeEditForm = function () {
   uploadFileForm.classList.add('hidden');
   document.removeEventListener('keydown', onEscCloseForm);
   uploadFile.value = '';
 };
 
-/* Функция масштабирования изображения */
+/**
+ * Функция масштабирования изображения
+ * @param {boolean} positiveFlag - флаг нажатия кнопок уменьшения/увеличения
+ */
 var setImageScale = function (positiveFlag) {
   var currentScale = Number.parseInt(scaleField.value, 10);
 
@@ -165,6 +204,78 @@ var setImageScale = function (positiveFlag) {
       scaleField.value = (currentScale - SCALE_STEP) + '%';
       imagePreview.style.transform = 'scale(' + (currentScale - SCALE_STEP) / 100 + ')';
     }
+  }
+};
+
+/**
+ * Функция выбора фильтра
+ */
+var onChangeSelectFilter = function () {
+  imagePreview.style.filter = '';
+
+  for (i = 0; i < effectButtons.length; i++) {
+    if (effectButtons[i].checked) {
+      imagePreview.classList.remove('effects__preview--' + currentEffect);
+      currentEffect = effectButtons[i].value;
+      if (currentEffect !== 'none') {
+        effectLevel.classList.remove('hidden');
+        imagePreview.classList.add('effects__preview--' + currentEffect);
+      } else {
+        effectLevel.classList.add('hidden');
+      }
+    }
+  }
+};
+
+/**
+ * Функция подсчета интенсивности эффекта
+ * @return {number} процент, на который передвинут ползунок
+ * интенсивности эффекта
+ */
+var countEffectLevel = function () {
+  var bar = effectlevelBar.getBoundingClientRect();
+  var pin = effectLevelButton.getBoundingClientRect();
+  var barLength = bar.right - bar.left;
+  var pinOffset = pin.left - bar.left;
+
+  return Math.round((pinOffset / barLength + 0.02) * 100);
+};
+
+/**
+ * Функция установки интенсивности эффекта изображению
+ */
+var setEffectLevel = function () {
+  effectInput.value = countEffectLevel();
+
+  var effect = window.getComputedStyle(imagePreview).filter;
+  var effectName = '';
+  i = 0;
+
+  while (effect[i] !== '(') {
+    effectName += effect[i];
+    i++;
+  }
+  switch (effectName) {
+    case 'grayscale':
+      effectName += '(' + effectInput.value + '%)';
+      imagePreview.style.filter = effectName;
+      break;
+    case 'sepia':
+      effectName += '(' + effectInput.value + '%)';
+      imagePreview.style.filter = effectName;
+      break;
+    case 'invert':
+      effectName += '(' + effectInput.value + '%)';
+      imagePreview.style.filter = effectName;
+      break;
+    case 'blur':
+      effectName += '(' + (effectInput.value / 100 * 3) + 'px)';
+      imagePreview.style.filter = effectName;
+      break;
+    case 'brightness':
+      effectName += '(' + (effectInput.value / 100 * 2 + 1) + ')';
+      imagePreview.style.filter = effectName;
+      break;
   }
 };
 
@@ -187,6 +298,16 @@ smallerScaleButton.addEventListener('click', function () {
 biggerScaleButton.addEventListener('click', function () {
   var positiveFlag = true;
   setImageScale(positiveFlag);
+});
+
+/* Обработчики смены фильтра изображения */
+for (var i = 0; i < effectButtons.length; i++) {
+  effectButtons[i].addEventListener('change', onChangeSelectFilter);
+}
+
+/* Обработчик нажатия на ползунок интенсивности эффекта */
+effectLevelButton.addEventListener('mouseup', function () {
+  setEffectLevel();
 });
 
 renderPhoto();
