@@ -4,6 +4,47 @@ var PHOTO_NUMBER = 25;
 var AVATAR_NUMBER = 6;
 var MAX_COMMENTS = 100;
 var VISIBLE_COMMENTS = 5;
+var ESC_KEYCODE = 27;
+var SCALE_STEP = 25;
+var MIN_SCALE = 25;
+var MAX_SCALE = 100;
+var MAX_BLUR_VALUE = 3;
+var BRIGHTNESS_RANGE = 2;
+var MIN_BRIGHTNESS_VALUE = 1;
+var MAX_HASHTAGS = 5;
+var MAX_HASHTAG_LENGTH = 20;
+
+/* Инициализация блока для заполнения и шаблона */
+var pictureBlock = document.querySelector('.pictures');
+var pictureTemplate = document.querySelector('#picture')
+  .content
+  .querySelector('.picture');
+
+var bigPictureElement = document.querySelector('.big-picture');
+var commentsList = document.querySelector('.social__comments');
+var commentElement = commentsList.querySelector('.social__comment');
+
+/* Инициализация формы загрузки изображения */
+var uploadFile = pictureBlock.querySelector('#upload-file');
+var uploadFileForm = pictureBlock.querySelector('.img-upload__overlay');
+var editCloseButton = uploadFileForm.querySelector('#upload-cancel');
+var imagePreview = uploadFileForm.querySelector('.img-upload__preview img');
+
+/* Инициализация элементов масштабирования изображения */
+var smallerScaleButton = uploadFileForm.querySelector('.scale__control--smaller');
+var biggerScaleButton = uploadFileForm.querySelector('.scale__control--bigger');
+var scaleField = uploadFileForm.querySelector('.scale__control--value');
+
+/* Инициализация элементов работы с фильтрами */
+var effectButtons = uploadFileForm.querySelectorAll('.effects__radio');
+var effectLevel = uploadFileForm.querySelector('.effect-level');
+var effectInput = effectLevel.querySelector('.effect-level__value');
+var effectlevelBar = effectLevel.querySelector('.effect-level__line');
+var effectLevelButton = effectLevel.querySelector('.effect-level__pin');
+var currentEffect;
+
+/* Инициализация поля ввода хэш-тега */
+var hashtagInput = uploadFileForm.querySelector('.text__hashtags');
 
 var commentExamples = [
   'Всё отлично!',
@@ -16,12 +57,21 @@ var commentExamples = [
 
 var names = ['Артем', 'Мария', 'Виталий', 'Кекс', 'Прохор', 'Анастасия'];
 
-/*  Функция генерации случайного целого числа в заданном диапазоне */
+/**
+ * Функция генерации случайного целого числа в заданном диапазоне
+ * @param {number} min - нижняя граница диапазона
+ * @param {number} max - верхняя граница диапазона
+ * @return {number} случайное число из заданного диапазона
+*/
 var getRandomElement = function (min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 };
 
-/* Функция генерации массива комментариев */
+/**
+ * Функция генерации массива комментариев
+ * @param {number} commentsNumber - число комментариев
+ * @return {array} массив объектов с коммментариями
+ */
 var generateComments = function (commentsNumber) {
   var comments = [];
 
@@ -36,7 +86,10 @@ var generateComments = function (commentsNumber) {
   return comments;
 };
 
-/* Функция генерации массива объектов с описанием фотографий */
+/**
+ * Функция генерации массива объектов с описанием фотографий
+ * @return {array} массив объектов с фотографиями
+ */
 var generatePhotoDescription = function () {
   var photos = [];
   for (var i = 0; i < PHOTO_NUMBER; i++) {
@@ -51,13 +104,12 @@ var generatePhotoDescription = function () {
   return photos;
 };
 
-/* Функция отрисовки большого изображения */
+/**
+ * Функция отрисовки большого изображения
+ * @param {object} photo - объект с полями информации о большой фотографии
+ */
 var showBigPicture = function (photo) {
-
-  var bigPictureElement = document.querySelector('.big-picture');
-  var commentsList = document.querySelector('.social__comments');
-  var commentElement = commentsList.querySelector('.social__comment');
-  bigPictureElement.classList.remove('hidden');
+  // bigPictureElement.classList.remove('hidden');
 
   /* Заполняем элемент контентом */
   bigPictureElement.querySelector('.big-picture__img img').src = photo.url;
@@ -90,21 +142,16 @@ var showBigPicture = function (photo) {
   bigPictureElement.querySelector('.comments-loader').classList.add('visually-hidden');
 };
 
-/* Функция отрисовки фотографий на странице */
+/**
+ * Функция отрисовки фотографий на странице
+ */
 var renderPhoto = function () {
-
-  /* Инициализируем блок для заполнения и шаблон */
-  var pictureBlock = document.querySelector('.pictures');
-  var pictureTemplate = document.querySelector('#picture')
-    .content
-    .querySelector('.picture');
-
   var photos = generatePhotoDescription();
 
   var fragment = document.createDocumentFragment();
 
-  /* Клонируем содержимое шаблона, добавляем данные из массива объектов
-     и записываем получившийся блок во фрагмент */
+  /* Клонируем содержимое шаблона, добавляем данные из массива
+    объектов и записываем получившийся блок во фрагмент */
   for (var i = 0; i < photos.length; i++) {
     var picture = pictureTemplate.cloneNode(true);
 
@@ -120,5 +167,210 @@ var renderPhoto = function () {
   /* Присоединяем готовый фрагмент к блоку picture */
   pictureBlock.appendChild(fragment);
 };
+
+/**
+ * Функция закрытия формы загрузки изображений по нажатию на Esc
+ * @param {object} evt - объект Event
+ */
+var onEscCloseForm = function (evt) {
+  if (evt.keyCode === ESC_KEYCODE) {
+    uploadFileForm.classList.add('hidden');
+  }
+  uploadFile.value = '';
+  document.removeEventListener('keydown', onEscCloseForm);
+};
+
+/**
+ * Функция открытия формы загрузки изображений
+ * @param {object} evt - объект Event
+ */
+var openEditForm = function () {
+  uploadFileForm.classList.remove('hidden');
+  document.addEventListener('keydown', onEscCloseForm);
+};
+
+/**
+ * Функция закрытия формы загрузки изображений
+ * @param {object} evt - объект Event
+ */
+var closeEditForm = function () {
+  uploadFileForm.classList.add('hidden');
+  document.removeEventListener('keydown', onEscCloseForm);
+  uploadFile.value = '';
+};
+
+/**
+ * Функция масштабирования изображения
+ * @param {boolean} positiveFlag - флаг нажатия кнопок уменьшения/увеличения
+ */
+var setImageScale = function (positiveFlag) {
+  var currentScale = Number.parseInt(scaleField.value, 10);
+
+  if (positiveFlag && (currentScale + SCALE_STEP) <= MAX_SCALE) {
+    scaleField.value = (currentScale + SCALE_STEP) + '%';
+    imagePreview.style.transform = 'scale(' + (currentScale + SCALE_STEP) / 100 + ')';
+  }
+
+  if (!positiveFlag && (currentScale - SCALE_STEP) >= MIN_SCALE) {
+    scaleField.value = (currentScale - SCALE_STEP) + '%';
+    imagePreview.style.transform = 'scale(' + (currentScale - SCALE_STEP) / 100 + ')';
+  }
+};
+
+/**
+ * Функция выбора фильтра
+ */
+var onChangeSelectFilter = function () {
+  imagePreview.style.filter = '';
+
+  for (i = 0; i < effectButtons.length; i++) {
+    if (effectButtons[i].checked) {
+      imagePreview.classList.remove('effects__preview--' + currentEffect);
+      currentEffect = effectButtons[i].value;
+      if (currentEffect !== 'none') {
+        effectLevel.classList.remove('hidden');
+        imagePreview.classList.add('effects__preview--' + currentEffect);
+      } else {
+        effectLevel.classList.add('hidden');
+      }
+    }
+  }
+};
+
+/**
+ * Функция подсчета интенсивности эффекта
+ * @return {number} процент, на который передвинут ползунок
+ * интенсивности эффекта
+ */
+var countEffectLevel = function () {
+  var bar = effectlevelBar.getBoundingClientRect();
+  var pin = effectLevelButton.getBoundingClientRect();
+  var barLength = bar.right - bar.left;
+  var pinOffset = pin.left - bar.left;
+
+  return Math.round((pinOffset / barLength + 0.02) * 100);
+};
+
+/**
+ * Функция установки интенсивности эффекта на изображении
+ */
+var setEffectLevel = function () {
+  effectInput.value = countEffectLevel();
+
+  var effect = window.getComputedStyle(imagePreview).filter.split('(', 1);
+
+  switch (effect[0]) {
+    case 'grayscale':
+      effect += '(' + effectInput.value + '%)';
+      imagePreview.style.filter = effect;
+      break;
+    case 'sepia':
+      effect += '(' + effectInput.value + '%)';
+      imagePreview.style.filter = effect;
+      break;
+    case 'invert':
+      effect += '(' + effectInput.value + '%)';
+      imagePreview.style.filter = effect;
+      break;
+    case 'blur':
+      effect += '(' + (effectInput.value / 100 * MAX_BLUR_VALUE) + 'px)';
+      imagePreview.style.filter = effect;
+      break;
+    case 'brightness':
+      effect += '(' + (effectInput.value / 100 * BRIGHTNESS_RANGE + MIN_BRIGHTNESS_VALUE) + ')';
+      imagePreview.style.filter = effect;
+      break;
+  }
+};
+
+/**
+ * Функция поиска дубликатов
+ * @param {array} hashtags - массив строк хэш-тегов
+ * @return {boolean} флаг, который показывает был ли найден дубликат
+ */
+var searchForDuplicate = function (hashtags) {
+  var duplicateFlag = false;
+
+  for (var i = 0; i < hashtags.length; i++) {
+    for (var j = i + 1; j < hashtags.length; j++) {
+      if (hashtags[i].indexOf(hashtags[j]) > -1) {
+        duplicateFlag = true;
+        return duplicateFlag;
+      }
+    }
+  }
+
+  return duplicateFlag;
+};
+
+/**
+ * Функция валидации хэш-тегов
+ */
+var validateHashtags = function () {
+  var hashtags = hashtagInput.value.toLowerCase().split(' ');
+
+  for (var i = 0; i < hashtags.length; i++) {
+    if (hashtags[i][0] !== '#') {
+      hashtagInput.setCustomValidity('Хэш-тег должен начинатсья с символа #');
+    } else if (hashtags[i].length === 1) {
+      hashtagInput.setCustomValidity('Хэш-тег не может состоять из одного символа #');
+    } else if (hashtags[i].indexOf('#', 1) > -1) {
+      hashtagInput.setCustomValidity('Хэш-теги должны быть разделены пробелом');
+    } else if (searchForDuplicate(hashtags)) {
+      hashtagInput.setCustomValidity('Один и тот же хэш-тег не может быть использован дважды');
+    } else if (hashtags.length > MAX_HASHTAGS) {
+      hashtagInput.setCustomValidity('Максимальное число тегов: ' + MAX_HASHTAGS);
+    } else if (hashtags[i].length > MAX_HASHTAG_LENGTH) {
+      hashtagInput.setCustomValidity('Максимальная длина хэш-тэга: ' + MAX_HASHTAG_LENGTH + ' символов');
+    } else {
+      hashtagInput.setCustomValidity('');
+    }
+  }
+};
+
+/* Обработчики событий открытия/закрытия
+  формы загрузки изображений */
+uploadFile.addEventListener('change', function () {
+  openEditForm();
+});
+
+editCloseButton.addEventListener('click', function () {
+  closeEditForm();
+});
+
+/* Обработчики кнопок масштабирования изображения */
+smallerScaleButton.addEventListener('click', function () {
+  var positiveFlag = false;
+  setImageScale(positiveFlag);
+});
+
+biggerScaleButton.addEventListener('click', function () {
+  var positiveFlag = true;
+  setImageScale(positiveFlag);
+});
+
+/* Обработчики смены фильтра изображения */
+for (var i = 0; i < effectButtons.length; i++) {
+  effectButtons[i].addEventListener('change', onChangeSelectFilter);
+}
+
+/* Обработчик нажатия на ползунок интенсивности эффекта */
+effectLevelButton.addEventListener('mouseup', function () {
+  setEffectLevel();
+});
+
+/* Обработчик валидации поля с хэш-тегами */
+hashtagInput.addEventListener('change', function () {
+  validateHashtags();
+});
+
+/* Обработчики, прерывающие/восстанавливающие обработчик закрытия формы */
+hashtagInput.addEventListener('focus', function () {
+  document.removeEventListener('keydown', onEscCloseForm);
+});
+
+hashtagInput.addEventListener('blur', function () {
+  document.addEventListener('keydown', onEscCloseForm);
+});
 
 renderPhoto();
