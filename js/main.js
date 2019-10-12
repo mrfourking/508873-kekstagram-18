@@ -209,11 +209,11 @@ var setImageScale = function (positiveFlag) {
   if (positiveFlag && (currentScale + SCALE_STEP) <= MAX_SCALE) {
     scaleField.value = (currentScale + SCALE_STEP) + '%';
     imagePreview.style.transform = 'scale(' + (currentScale + SCALE_STEP) / 100 + ')';
-  } else {
-    if (!positiveFlag && (currentScale - SCALE_STEP) >= MIN_SCALE) {
-      scaleField.value = (currentScale - SCALE_STEP) + '%';
-      imagePreview.style.transform = 'scale(' + (currentScale - SCALE_STEP) / 100 + ')';
-    }
+  }
+
+  if (!positiveFlag && (currentScale - SCALE_STEP) >= MIN_SCALE) {
+    scaleField.value = (currentScale - SCALE_STEP) + '%';
+    imagePreview.style.transform = 'scale(' + (currentScale - SCALE_STEP) / 100 + ')';
   }
 };
 
@@ -257,60 +257,30 @@ var countEffectLevel = function () {
 var setEffectLevel = function () {
   effectInput.value = countEffectLevel();
 
-  var effect = window.getComputedStyle(imagePreview).filter;
-  var effectName = '';
-  i = 0;
+  var effect = window.getComputedStyle(imagePreview).filter.split('(', 1);
 
-  while (effect[i] !== '(') {
-    effectName += effect[i];
-    i++;
-  }
-  switch (effectName) {
+  switch (effect[0]) {
     case 'grayscale':
-      effectName += '(' + effectInput.value + '%)';
-      imagePreview.style.filter = effectName;
+      effect += '(' + effectInput.value + '%)';
+      imagePreview.style.filter = effect;
       break;
     case 'sepia':
-      effectName += '(' + effectInput.value + '%)';
-      imagePreview.style.filter = effectName;
+      effect += '(' + effectInput.value + '%)';
+      imagePreview.style.filter = effect;
       break;
     case 'invert':
-      effectName += '(' + effectInput.value + '%)';
-      imagePreview.style.filter = effectName;
+      effect += '(' + effectInput.value + '%)';
+      imagePreview.style.filter = effect;
       break;
     case 'blur':
-      effectName += '(' + (effectInput.value / 100 * MAX_BLUR_VALUE) + 'px)';
-      imagePreview.style.filter = effectName;
+      effect += '(' + (effectInput.value / 100 * MAX_BLUR_VALUE) + 'px)';
+      imagePreview.style.filter = effect;
       break;
     case 'brightness':
-      effectName += '(' + (effectInput.value / 100 * BRIGHTNESS_RANGE + MIN_BRIGHTNESS_VALUE) + ')';
-      imagePreview.style.filter = effectName;
+      effect += '(' + (effectInput.value / 100 * BRIGHTNESS_RANGE + MIN_BRIGHTNESS_VALUE) + ')';
+      imagePreview.style.filter = effect;
       break;
   }
-};
-
-/**
- * Функция получения массива хэш-тегов готового для обработки
- * @return {array} массив со значениями хэш-тегов
- */
-var getHashtags = function () {
-  var str = hashtagInput.value.toLowerCase();
-  var hashtags = [];
-  var hashtag = '';
-
-  for (var i = 0; i < str.length; i++) {
-    if (str[i] !== ' ') {
-      hashtag += str[i];
-      if (i + 1 === str.length) {
-        hashtags.push(hashtag);
-      }
-    } else {
-      hashtags.push(hashtag);
-      hashtag = '';
-    }
-  }
-
-  return hashtags;
 };
 
 /**
@@ -337,7 +307,7 @@ var searchForDuplicate = function (hashtags) {
  * Функция валидации хэш-тегов
  */
 var validateHashtags = function () {
-  var hashtags = getHashtags();
+  var hashtags = hashtagInput.value.toLowerCase().split(' ');
 
   for (var i = 0; i < hashtags.length; i++) {
     if (hashtags[i][0] !== '#') {
