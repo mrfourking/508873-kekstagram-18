@@ -19,8 +19,11 @@ var pictureBlock = document.querySelector('.pictures');
 var pictureTemplate = document.querySelector('#picture')
   .content
   .querySelector('.picture');
+var photos = [];
 
+var pictures = pictureBlock.querySelectorAll('.picture');
 var bigPictureElement = document.querySelector('.big-picture');
+var bigCloseButton = bigPictureElement.querySelector('.big-picture__cancel');
 var commentsList = document.querySelector('.social__comments');
 var commentElement = commentsList.querySelector('.social__comment');
 
@@ -91,7 +94,6 @@ var generateComments = function (commentsNumber) {
  * @return {array} массив объектов с фотографиями
  */
 var generatePhotoDescription = function () {
-  var photos = [];
   for (var i = 0; i < PHOTO_NUMBER; i++) {
     photos.push({
       url: 'photos/' + (i + 1) + '.jpg',
@@ -109,7 +111,7 @@ var generatePhotoDescription = function () {
  * @param {object} photo - объект с полями информации о большой фотографии
  */
 var showBigPicture = function (photo) {
-  // bigPictureElement.classList.remove('hidden');
+  bigPictureElement.classList.remove('hidden');
 
   /* Заполняем элемент контентом */
   bigPictureElement.querySelector('.big-picture__img img').src = photo.url;
@@ -143,10 +145,46 @@ var showBigPicture = function (photo) {
 };
 
 /**
+ * Функция закрытия окна с большим изображением
+ */
+var closeBigPicture = function () {
+  bigPictureElement.classList.add('hidden');
+  bigCloseButton.removeEventListener('click', closeBigPicture);
+  document.removeEventListener('keydown', onEscCloseBigPicture);
+};
+
+/**
+ * Функция закрытия окна с большим изображением по нажатию на Esc
+ * @param {object} evt - объект Event
+ */
+var onEscCloseBigPicture = function (evt) {
+  if (evt.keyCode === ESC_KEYCODE) {
+    closeBigPicture();
+  }
+};
+
+/**
+ * Функция обертка обработчика, которая передает нужный индекс и
+ * запускает процесс отрисовки большого изображения
+ * @param {number} i - индекс нужного объекта в массиве photos
+ * с описанием фото
+ * @return {function} возвращает функцию обработчика
+ */
+var onSmallPictureClick = function (i) {
+  return function (evt) {
+    evt.preventDefault();
+    showBigPicture(photos[i]);
+
+    bigCloseButton.addEventListener('click', closeBigPicture);
+    document.addEventListener('keydown', onEscCloseBigPicture);
+  };
+};
+
+/**
  * Функция отрисовки фотографий на странице
  */
 var renderPhoto = function () {
-  var photos = generatePhotoDescription();
+  photos = generatePhotoDescription();
 
   var fragment = document.createDocumentFragment();
 
@@ -162,11 +200,18 @@ var renderPhoto = function () {
     fragment.appendChild(picture);
   }
 
-  showBigPicture(photos[0]);
-
   /* Присоединяем готовый фрагмент к блоку picture */
   pictureBlock.appendChild(fragment);
+
+  /* Ищем все сгенерированные изображения в разметке и
+    вешает на них обработчики для открытия окна с большим фото */
+  pictures = pictureBlock.querySelectorAll('.picture');
+
+  for (i = 0; i < pictures.length; i++) {
+    pictures[i].addEventListener('click', onSmallPictureClick(i));
+  }
 };
+
 
 /**
  * Функция закрытия формы загрузки изображений по нажатию на Esc
