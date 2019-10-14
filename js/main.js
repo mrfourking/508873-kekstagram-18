@@ -21,6 +21,7 @@ var pictureTemplate = document.querySelector('#picture')
   .querySelector('.picture');
 var photos = [];
 
+/* Инициализация блока полноразмерного просмотра изображения*/
 var pictures = pictureBlock.querySelectorAll('.picture');
 var bigPictureElement = document.querySelector('.big-picture');
 var bigCloseButton = bigPictureElement.querySelector('.big-picture__cancel');
@@ -46,8 +47,9 @@ var effectlevelBar = effectLevel.querySelector('.effect-level__line');
 var effectLevelButton = effectLevel.querySelector('.effect-level__pin');
 var currentEffect;
 
-/* Инициализация поля ввода хэш-тега */
+/* Инициализация поля ввода хэш-тега и комментариев*/
 var hashtagInput = uploadFileForm.querySelector('.text__hashtags');
+var commentTextArea = uploadFileForm.querySelector('.text__description');
 
 var commentExamples = [
   'Всё отлично!',
@@ -212,6 +214,15 @@ var renderPhoto = function () {
   }
 };
 
+/**
+ * Функция закрытия формы загрузки изображений
+ * @param {object} evt - объект Event
+ */
+var closeEditForm = function () {
+  uploadFileForm.classList.add('hidden');
+  document.removeEventListener('keydown', onEscCloseForm);
+  uploadFile.value = '';
+};
 
 /**
  * Функция закрытия формы загрузки изображений по нажатию на Esc
@@ -219,10 +230,8 @@ var renderPhoto = function () {
  */
 var onEscCloseForm = function (evt) {
   if (evt.keyCode === ESC_KEYCODE) {
-    uploadFileForm.classList.add('hidden');
+    closeEditForm();
   }
-  uploadFile.value = '';
-  document.removeEventListener('keydown', onEscCloseForm);
 };
 
 /**
@@ -232,16 +241,6 @@ var onEscCloseForm = function (evt) {
 var openEditForm = function () {
   uploadFileForm.classList.remove('hidden');
   document.addEventListener('keydown', onEscCloseForm);
-};
-
-/**
- * Функция закрытия формы загрузки изображений
- * @param {object} evt - объект Event
- */
-var closeEditForm = function () {
-  uploadFileForm.classList.add('hidden');
-  document.removeEventListener('keydown', onEscCloseForm);
-  uploadFile.value = '';
 };
 
 /**
@@ -415,6 +414,14 @@ hashtagInput.addEventListener('focus', function () {
 });
 
 hashtagInput.addEventListener('blur', function () {
+  document.addEventListener('keydown', onEscCloseForm);
+});
+
+commentTextArea.addEventListener('focus', function () {
+  document.removeEventListener('keydown', onEscCloseForm);
+});
+
+commentTextArea.addEventListener('blur', function () {
   document.addEventListener('keydown', onEscCloseForm);
 });
 
