@@ -10,21 +10,31 @@
   var MIN_BRIGHTNESS_VALUE = 1;
 
   /* Инициализация блока предпросмотра изображения */
-  var imagePreview = window.form.uploadFileForm.querySelector('.img-upload__preview img');
+  var imagePreview = window.form.uploadFileForm
+    .querySelector('.img-upload__preview img');
 
   /* Инициализация элементов масштабирования изображения */
-  var smallerScaleButton = window.form.uploadFileForm.querySelector('.scale__control--smaller');
-  var biggerScaleButton = window.form.uploadFileForm.querySelector('.scale__control--bigger');
-  var scaleField = window.form.uploadFileForm.querySelector('.scale__control--value');
+  var smallerScaleButton = window.form.uploadFileForm
+    .querySelector('.scale__control--smaller');
+  var biggerScaleButton = window.form.uploadFileForm
+    .querySelector('.scale__control--bigger');
+  var scaleField = window.form.uploadFileForm
+    .querySelector('.scale__control--value');
 
   /* Инициализация элементов работы с фильтрами */
-  var effectButtons = window.form.uploadFileForm.querySelectorAll('.effects__radio');
-  var effectLevel = window.form.uploadFileForm.querySelector('.effect-level');
-  var effectInput = effectLevel.querySelector('.effect-level__value');
-  var effectlevelBar = effectLevel.querySelector('.effect-level__line');
-  var effectLevelButton = effectLevel.querySelector('.effect-level__pin');
+  var effectButtons = window.form.uploadFileForm
+    .querySelectorAll('.effects__radio');
+  var effectInput = window.form.effectLevel
+    .querySelector('.effect-level__value');
+  var effectlevelBar = window.form.effectLevel
+    .querySelector('.effect-level__line');
+  var effectLevelButton = window.form.effectLevel
+    .querySelector('.effect-level__pin');
+  var effectlevelFillBar = window.form.effectLevel
+    .querySelector('.effect-level__depth');
   var currentEffect;
-
+  var bar;
+  var barLength;
   /**
    * Функция масштабирования изображения
    * @param {boolean} positiveFlag - флаг нажатия кнопок уменьшения/увеличения
@@ -54,10 +64,14 @@
         imagePreview.classList.remove('effects__preview--' + currentEffect);
         currentEffect = effectButtons[i].value;
         if (currentEffect !== 'none') {
-          effectLevel.classList.remove('hidden');
+          window.form.effectLevel.classList.remove('hidden');
+          bar = effectlevelBar.getBoundingClientRect();
+          barLength = bar.right - bar.left;
           imagePreview.classList.add('effects__preview--' + currentEffect);
+          effectLevelButton.style.left = barLength + 'px';
+          effectlevelFillBar.style.width = '100%';
         } else {
-          effectLevel.classList.add('hidden');
+          window.form.effectLevel.classList.add('hidden');
         }
       }
     }
@@ -69,9 +83,7 @@
    * интенсивности эффекта
    */
   var countEffectLevel = function () {
-    var bar = effectlevelBar.getBoundingClientRect();
     var pin = effectLevelButton.getBoundingClientRect();
-    var barLength = bar.right - bar.left;
     var pinOffset = pin.left - bar.left;
 
     return Math.round((pinOffset / barLength + 0.02) * 100);
@@ -109,6 +121,49 @@
     }
   };
 
+  /**
+   * Функция обработчика нажатия на ползунок изменения интенсивности эффекта
+   * @param {object} evt - объект Event
+   */
+  var onEffectPinMouseDown = function (evt) {
+    evt.preventDefault();
+
+    document.addEventListener('mousemove', onEffectPinMouseMove);
+    document.addEventListener('mouseup', onEffectPinMouseUp);
+  };
+
+  /**
+   * Функция обработчика перемещения мыши при нажатии на ползунок
+   * изменения интенсивности эффекта
+   * @param {object} evt - объект Event
+   */
+  var onEffectPinMouseMove = function (evt) {
+    bar = effectlevelBar.getBoundingClientRect();
+    barLength = bar.right - bar.left;
+
+    var shift = evt.clientX - bar.left;
+
+    if (shift > 0 && shift <= barLength) {
+      effectLevelButton.style.left = shift + 'px';
+    }
+
+    effectlevelFillBar.style.width = countEffectLevel() + '%';
+
+    setEffectLevel();
+  };
+
+  /**
+   * Фукнция обработчика отпускания кнопки мыши после нажатия на
+   * ползунок изменения интенсивности эффекта
+   * @param {object} evt - объект Event
+   */
+  var onEffectPinMouseUp = function (evt) {
+    evt.preventDefault();
+
+    document.removeEventListener('mousemove', onEffectPinMouseMove);
+    document.removeEventListener('mouseup', onEffectPinMouseUp);
+  };
+
   /* Обработчики кнопок масштабирования изображения */
   smallerScaleButton.addEventListener('click', function () {
     var positiveFlag = false;
@@ -125,8 +180,6 @@
     effectButtons[i].addEventListener('change', onChangeSelectFilter);
   }
 
-  /* Обработчик нажатия на ползунок интенсивности эффекта */
-  effectLevelButton.addEventListener('mouseup', function () {
-    setEffectLevel();
-  });
+  /* Обработчик нажатия на ползунок изменения интенсивности эффекта */
+  effectLevelButton.addEventListener('mousedown', onEffectPinMouseDown);
 })();
