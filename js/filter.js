@@ -33,7 +33,6 @@
   var effectlevelFillBar = window.form.effectLevel
     .querySelector('.effect-level__depth');
   var currentEffect;
-  var startCoord;
   var bar;
   var barLength;
   /**
@@ -129,8 +128,6 @@
   var onEffectPinMouseDown = function (evt) {
     evt.preventDefault();
 
-    startCoord = evt.clientX;
-
     document.addEventListener('mousemove', onEffectPinMouseMove);
     document.addEventListener('mouseup', onEffectPinMouseUp);
   };
@@ -141,21 +138,18 @@
    * @param {object} evt - объект Event
    */
   var onEffectPinMouseMove = function (evt) {
-    var shift = startCoord - evt.clientX;
     bar = effectlevelBar.getBoundingClientRect();
     barLength = bar.right - bar.left;
 
-    var endCoord = effectLevelButton.offsetLeft - shift;
+    var shift = evt.clientX - bar.left;
 
-    startCoord = evt.clientX;
-
-    if (endCoord > 0 && endCoord < barLength) {
-      effectLevelButton.style.left = endCoord + 'px';
+    if (shift > 0 && shift <= barLength) {
+      effectLevelButton.style.left = shift + 'px';
     }
 
-    effectlevelFillBar.style.width = countEffectLevel(bar) + '%';
+    effectlevelFillBar.style.width = countEffectLevel() + '%';
 
-    setEffectLevel(bar);
+    setEffectLevel();
   };
 
   /**
