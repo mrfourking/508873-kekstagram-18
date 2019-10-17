@@ -54,8 +54,10 @@
     return photos;
   };
 
+  photos = generatePhotoDescription();
+
   window.data = {
-    photos: photos = generatePhotoDescription()
+    photos: photos
   };
 
 })();
