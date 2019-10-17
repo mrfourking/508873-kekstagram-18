@@ -8,7 +8,7 @@
   var uploadFile = window.render.pictureBlock.querySelector('#upload-file');
   var uploadFileForm = window.render.pictureBlock.querySelector('.img-upload__overlay');
   var editCloseButton = uploadFileForm.querySelector('#upload-cancel');
-
+  var effectLevel = uploadFileForm.querySelector('.effect-level');
 
   /* Инициализация поля ввода хэш-тега и комментариев*/
   var hashtagInput = uploadFileForm.querySelector('.text__hashtags');
@@ -41,6 +41,7 @@
   var openEditForm = function () {
     uploadFileForm.classList.remove('hidden');
     document.addEventListener('keydown', onEscCloseForm);
+    effectLevel.classList.add('hidden');
   };
 
   /**
@@ -121,6 +122,7 @@
   });
 
   window.form = {
-    uploadFileForm: uploadFileForm
+    uploadFileForm: uploadFileForm,
+    effectLevel: effectLevel
   };
 })();
