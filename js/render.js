@@ -47,6 +47,7 @@
   window.network.loadData(renderPhoto, onError);
 
   window.render = {
-    pictureBlock: pictureBlock
+    pictureBlock: pictureBlock,
+    onError: onError
   };
 })();

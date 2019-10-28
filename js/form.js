@@ -4,22 +4,29 @@
   var MAX_HASHTAGS = 5;
   var MAX_HASHTAG_LENGTH = 20;
 
+  var mainNode = document.querySelector('main');
+
   /* Инициализация формы загрузки изображения */
   var uploadFile = window.render.pictureBlock.querySelector('#upload-file');
-  var uploadFileForm = window.render.pictureBlock.querySelector('.img-upload__overlay');
-  var editCloseButton = uploadFileForm.querySelector('#upload-cancel');
-  var effectLevel = uploadFileForm.querySelector('.effect-level');
+  var uploadFileForm = window.render.pictureBlock.querySelector('.img-upload__form');
+  var editFileForm = window.render.pictureBlock.querySelector('.img-upload__overlay');
+  var editCloseButton = editFileForm.querySelector('#upload-cancel');
+  var effectLevel = editFileForm.querySelector('.effect-level');
 
   /* Инициализация поля ввода хэш-тега и комментариев*/
-  var hashtagInput = uploadFileForm.querySelector('.text__hashtags');
-  var commentTextArea = uploadFileForm.querySelector('.text__description');
+  var hashtagInput = editFileForm.querySelector('.text__hashtags');
+  var commentTextArea = editFileForm.querySelector('.text__description');
+
+  var successTemplate = document.querySelector('#success')
+    .content
+    .querySelector('.success');
 
   /**
    * Функция закрытия формы загрузки изображений
    * @param {object} evt - объект Event
    */
   var closeEditForm = function () {
-    uploadFileForm.classList.add('hidden');
+    editFileForm.classList.add('hidden');
     document.removeEventListener('keydown', onEscCloseForm);
     uploadFile.value = '';
   };
@@ -39,7 +46,7 @@
    * @param {object} evt - объект Event
    */
   var openEditForm = function () {
-    uploadFileForm.classList.remove('hidden');
+    editFileForm.classList.remove('hidden');
     document.addEventListener('keydown', onEscCloseForm);
     effectLevel.classList.add('hidden');
   };
@@ -89,6 +96,13 @@
     }
   };
 
+  var onSuccess = function () {
+    closeEditForm();
+
+    var successNode = successTemplate.cloneNode(true);
+    mainNode.appendChild(successNode);
+  };
+
   /* Обработчики событий открытия/закрытия
     формы загрузки изображений */
   uploadFile.addEventListener('change', function () {
@@ -121,8 +135,13 @@
     document.addEventListener('keydown', onEscCloseForm);
   });
 
+  uploadFileForm.addEventListener('submit', function (evt) {
+    evt.preventDefault();
+    window.network.saveData(new FormData(uploadFileForm), onSuccess, window.render.onError);
+  });
+
   window.form = {
-    uploadFileForm: uploadFileForm,
+    editFileForm: editFileForm,
     effectLevel: effectLevel
   };
 })();

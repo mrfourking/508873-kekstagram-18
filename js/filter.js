@@ -10,19 +10,19 @@
   var MIN_BRIGHTNESS_VALUE = 1;
 
   /* Инициализация блока предпросмотра изображения */
-  var imagePreview = window.form.uploadFileForm
+  var imagePreview = window.form.editFileForm
     .querySelector('.img-upload__preview img');
 
   /* Инициализация элементов масштабирования изображения */
-  var smallerScaleButton = window.form.uploadFileForm
+  var smallerScaleButton = window.form.editFileForm
     .querySelector('.scale__control--smaller');
-  var biggerScaleButton = window.form.uploadFileForm
+  var biggerScaleButton = window.form.editFileForm
     .querySelector('.scale__control--bigger');
-  var scaleField = window.form.uploadFileForm
+  var scaleField = window.form.editFileForm
     .querySelector('.scale__control--value');
 
   /* Инициализация элементов работы с фильтрами */
-  var effectButtons = window.form.uploadFileForm
+  var effectButtons = window.form.editFileForm
     .querySelectorAll('.effects__radio');
   var effectInput = window.form.effectLevel
     .querySelector('.effect-level__value');
