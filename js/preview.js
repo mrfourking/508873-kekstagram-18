@@ -1,7 +1,6 @@
 'use strict';
 
 (function () {
-  var VISIBLE_COMMENTS = 5;
 
   /* Инициализация блока полноразмерного просмотра изображения*/
   var pictures = window.render.pictureBlock.querySelectorAll('.picture');
@@ -25,7 +24,7 @@
 
     var fragment = document.createDocumentFragment();
 
-    for (var i = 0; i < VISIBLE_COMMENTS; i++) {
+    for (var i = 0; i < photo.comments.length; i++) {
       var comment = commentElement.cloneNode(true);
 
       comment.querySelector('.social__picture').src = photo.comments[i].avatar;
@@ -77,7 +76,7 @@
   var onSmallPictureClick = function (i) {
     return function (evt) {
       evt.preventDefault();
-      showBigPicture(window.data.photos[i]);
+      showBigPicture(window.render.photoDescriptions[i]);
 
       bigCloseButton.addEventListener('click', closeBigPicture);
       document.addEventListener('keydown', onEscCloseBigPicture);
@@ -99,5 +98,5 @@
     }
   };
 
-  initPreview();
+  setTimeout(initPreview, 1000);
 })();
