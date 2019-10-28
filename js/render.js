@@ -6,6 +6,9 @@
   var pictureTemplate = document.querySelector('#picture')
     .content
     .querySelector('.picture');
+  var errorTemplate = document.querySelector('#error')
+    .content
+    .querySelector('.error');
 
   /**
    * Функция отрисовки фотографий на странице
@@ -32,7 +35,16 @@
     pictureBlock.appendChild(fragment);
   };
 
-  window.network.loadData(renderPhoto, window.util.onError);
+  var onError = function (errorText) {
+    var errorNode = errorTemplate.cloneNode(true);
+
+    errorNode.querySelector('.error__title').textContent = errorText;
+
+    pictureBlock.appendChild(errorNode);
+  };
+
+
+  window.network.loadData(renderPhoto, onError);
 
   window.render = {
     pictureBlock: pictureBlock
