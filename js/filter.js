@@ -10,22 +10,20 @@
   var MIN_BRIGHTNESS_VALUE = 1;
 
   /* Инициализация блока предпросмотра изображения */
-  var imagePreview = window.form.uploadFileForm
+  var imagePreview = window.form.editFileForm
     .querySelector('.img-upload__preview img');
 
   /* Инициализация элементов масштабирования изображения */
-  var smallerScaleButton = window.form.uploadFileForm
+  var smallerScaleButton = window.form.editFileForm
     .querySelector('.scale__control--smaller');
-  var biggerScaleButton = window.form.uploadFileForm
+  var biggerScaleButton = window.form.editFileForm
     .querySelector('.scale__control--bigger');
-  var scaleField = window.form.uploadFileForm
+  var scaleField = window.form.editFileForm
     .querySelector('.scale__control--value');
 
   /* Инициализация элементов работы с фильтрами */
-  var effectButtons = window.form.uploadFileForm
+  var effectButtons = window.form.editFileForm
     .querySelectorAll('.effects__radio');
-  var effectInput = window.form.effectLevel
-    .querySelector('.effect-level__value');
   var effectlevelBar = window.form.effectLevel
     .querySelector('.effect-level__line');
   var effectLevelButton = window.form.effectLevel
@@ -70,8 +68,10 @@
           imagePreview.classList.add('effects__preview--' + currentEffect);
           effectLevelButton.style.left = barLength + 'px';
           effectlevelFillBar.style.width = '100%';
+          window.form.effectInput.value = '100';
         } else {
           window.form.effectLevel.classList.add('hidden');
+          window.form.effectInput.value = '0';
         }
       }
     }
@@ -93,29 +93,29 @@
    * Функция установки интенсивности эффекта на изображении
    */
   var setEffectLevel = function () {
-    effectInput.value = countEffectLevel();
+    window.form.effectInput.value = countEffectLevel();
 
     var effect = window.getComputedStyle(imagePreview).filter.split('(', 1);
 
     switch (effect[0]) {
       case 'grayscale':
-        effect += '(' + effectInput.value + '%)';
+        effect += '(' + window.form.effectInput.value + '%)';
         imagePreview.style.filter = effect;
         break;
       case 'sepia':
-        effect += '(' + effectInput.value + '%)';
+        effect += '(' + window.form.effectInput.value + '%)';
         imagePreview.style.filter = effect;
         break;
       case 'invert':
-        effect += '(' + effectInput.value + '%)';
+        effect += '(' + window.form.effectInput.value + '%)';
         imagePreview.style.filter = effect;
         break;
       case 'blur':
-        effect += '(' + (effectInput.value / 100 * MAX_BLUR_VALUE) + 'px)';
+        effect += '(' + (window.form.effectInput.value / 100 * MAX_BLUR_VALUE) + 'px)';
         imagePreview.style.filter = effect;
         break;
       case 'brightness':
-        effect += '(' + (effectInput.value / 100 * BRIGHTNESS_RANGE + MIN_BRIGHTNESS_VALUE) + ')';
+        effect += '(' + (window.form.effectInput.value / 100 * BRIGHTNESS_RANGE + MIN_BRIGHTNESS_VALUE) + ')';
         imagePreview.style.filter = effect;
         break;
     }
@@ -153,7 +153,7 @@
   };
 
   /**
-   * Фукнция обработчика отпускания кнопки мыши после нажатия на
+   * Функция обработчика отпускания кнопки мыши после нажатия на
    * ползунок изменения интенсивности эффекта
    * @param {object} evt - объект Event
    */

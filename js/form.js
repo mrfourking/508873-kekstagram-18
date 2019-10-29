@@ -6,20 +6,26 @@
 
   /* Инициализация формы загрузки изображения */
   var uploadFile = window.render.pictureBlock.querySelector('#upload-file');
-  var uploadFileForm = window.render.pictureBlock.querySelector('.img-upload__overlay');
-  var editCloseButton = uploadFileForm.querySelector('#upload-cancel');
-  var effectLevel = uploadFileForm.querySelector('.effect-level');
+  var uploadFileForm = window.render.pictureBlock.querySelector('.img-upload__form');
+  var editFileForm = window.render.pictureBlock.querySelector('.img-upload__overlay');
+  var editCloseButton = editFileForm.querySelector('#upload-cancel');
+  var effectLevel = editFileForm.querySelector('.effect-level');
+  var effectInput = effectLevel.querySelector('.effect-level__value');
 
   /* Инициализация поля ввода хэш-тега и комментариев*/
-  var hashtagInput = uploadFileForm.querySelector('.text__hashtags');
-  var commentTextArea = uploadFileForm.querySelector('.text__description');
+  var hashtagInput = editFileForm.querySelector('.text__hashtags');
+  var commentTextArea = editFileForm.querySelector('.text__description');
+
+  var successTemplate = document.querySelector('#success')
+    .content
+    .querySelector('.success');
 
   /**
    * Функция закрытия формы загрузки изображений
    * @param {object} evt - объект Event
    */
   var closeEditForm = function () {
-    uploadFileForm.classList.add('hidden');
+    editFileForm.classList.add('hidden');
     document.removeEventListener('keydown', onEscCloseForm);
     uploadFile.value = '';
   };
@@ -39,7 +45,8 @@
    * @param {object} evt - объект Event
    */
   var openEditForm = function () {
-    uploadFileForm.classList.remove('hidden');
+    editFileForm.classList.remove('hidden');
+    effectInput.value = '0';
     document.addEventListener('keydown', onEscCloseForm);
     effectLevel.classList.add('hidden');
   };
@@ -89,6 +96,61 @@
     }
   };
 
+  /**
+   * Функция закрытия окна с сообщением об удачной загрузке фото
+   */
+  var closeSuccessBlock = function () {
+    var successBlock = window.render.mainBlock.querySelector('.success');
+    var successButton = successBlock.querySelector('.success__button');
+    window.render.mainBlock.removeChild(successBlock);
+
+    document.removeEventListener('keydown', onEscCloseSuccessBlock);
+    successButton.removeEventListener('click', closeSuccessBlock);
+    document.removeEventListener('click', onClickCloseSuccessBlock);
+
+    uploadFileForm.reset();
+  };
+
+  /**
+   * Функция закрытия окна с сообщением об удачной загрузке фото
+   * по нажатию на кнопку Esc
+   * @param {Object} evt - объект Event
+   */
+  var onEscCloseSuccessBlock = function (evt) {
+    if (evt.keyCode === window.util.ESC_KEYCODE) {
+      closeSuccessBlock();
+    }
+  };
+
+  /**
+   * Функция закрытия окна с сообщением об удачной загрузке фото
+   * при клике по произвольной области вне окна
+   * @param {Object} evt - объект Event
+   */
+  var onClickCloseSuccessBlock = function (evt) {
+    var innerSuccessBlock = window.render.mainBlock.querySelector('.success__inner');
+    if (evt.target !== innerSuccessBlock && !(innerSuccessBlock.contains(evt.target))) {
+      closeSuccessBlock();
+    }
+  };
+
+  /**
+   * Функция callback, которая выводит сообщение при удачной
+   * отправке запроса
+   */
+  var onSuccess = function () {
+    closeEditForm();
+
+    var successBlock = successTemplate.cloneNode(true);
+    var successButton = successBlock.querySelector('.success__button');
+
+    window.render.mainBlock.appendChild(successBlock);
+
+    document.addEventListener('keydown', onEscCloseSuccessBlock);
+    successButton.addEventListener('click', closeSuccessBlock);
+    document.addEventListener('click', onClickCloseSuccessBlock);
+  };
+
   /* Обработчики событий открытия/закрытия
     формы загрузки изображений */
   uploadFile.addEventListener('change', function () {
@@ -121,8 +183,15 @@
     document.addEventListener('keydown', onEscCloseForm);
   });
 
+  /* Обработчик кнопки отправки формы */
+  uploadFileForm.addEventListener('submit', function (evt) {
+    evt.preventDefault();
+    window.network.saveData(new FormData(uploadFileForm), onSuccess, window.render.onError);
+  });
+
   window.form = {
-    uploadFileForm: uploadFileForm,
-    effectLevel: effectLevel
+    editFileForm: editFileForm,
+    effectLevel: effectLevel,
+    effectInput: effectInput
   };
 })();

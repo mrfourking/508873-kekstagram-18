@@ -2,11 +2,12 @@
 
 (function () {
   var URL = 'https://js.dump.academy/kekstagram/data';
+  var URL_SAVE = 'https://js.dump.academy/kekstagram';
   var SUCCESS_STATUS = 200;
   var XHR_TIMEOUT = 10000;
 
   /**
-   * Фукнция инициализации запроса с первоначальными настройками
+   * Функция инициализации запроса с первоначальными настройками
    * @param {function} onLoad - callback-функция, вызывающаяся при удачном запросе
    * @param {function} onError - callback-функция, вызывающаяся при неудачном запросе
    * @return {Object} возвращает экземляр объекта XMLHttpRequest
@@ -49,7 +50,15 @@
 
   };
 
+  var saveData = function (data, onLoad, onError) {
+    var xhr = generateRequest(onLoad, onError);
+
+    xhr.open('POST', URL_SAVE);
+    xhr.send(data);
+  };
+
   window.network = {
-    loadData: loadData
+    loadData: loadData,
+    saveData: saveData
   };
 })();
