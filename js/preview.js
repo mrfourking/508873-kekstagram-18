@@ -34,13 +34,14 @@
       fragment.appendChild(comment);
     }
 
-    /* Удаляем элементы по умолчанию */
-    var children = commentsList.children;
+    /* Удаляем комментарии по умолчанию */
+    var children = Array.from(commentsList.children);
 
-    for (i = children.length - 1; i >= 0; i--) {
-      commentsList.removeChild(children[i]);
-    }
+    children.forEach(function (item) {
+      commentsList.removeChild(item);
+    });
 
+    /* Присоединяем фрагмент к блоку */
     commentsList.appendChild(fragment);
 
     bigPictureElement.querySelector('.social__comment-count').classList.add('visually-hidden');
@@ -76,7 +77,7 @@
   var onSmallPictureClick = function (i) {
     return function (evt) {
       evt.preventDefault();
-      showBigPicture(window.render.photoDescriptions[i]);
+      showBigPicture(window.render.photos[i]);
 
       bigCloseButton.addEventListener('click', closeBigPicture);
       document.addEventListener('keydown', onEscCloseBigPicture);
@@ -99,4 +100,8 @@
   };
 
   setTimeout(initPreview, 1000);
+
+  window.preview = {
+    initPreview: initPreview
+  };
 })();

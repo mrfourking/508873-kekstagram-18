@@ -1,8 +1,11 @@
 'use strict';
 
 (function () {
-  var URL = 'https://js.dump.academy/kekstagram/data';
-  var URL_SAVE = 'https://js.dump.academy/kekstagram';
+  var ServerUrl = {
+    LOAD: 'https://js.dump.academy/kekstagram/data',
+    SAVE: 'https://js.dump.academy/kekstagram'
+  };
+
   var SUCCESS_STATUS = 200;
   var XHR_TIMEOUT = 10000;
 
@@ -45,7 +48,7 @@
   var loadData = function (onLoad, onError) {
     var xhr = generateRequest(onLoad, onError);
 
-    xhr.open('GET', URL);
+    xhr.open('GET', ServerUrl.LOAD);
     xhr.send();
 
   };
@@ -53,7 +56,7 @@
   var saveData = function (data, onLoad, onError) {
     var xhr = generateRequest(onLoad, onError);
 
-    xhr.open('POST', URL_SAVE);
+    xhr.open('POST', ServerUrl.SAVE);
     xhr.send(data);
   };
 
