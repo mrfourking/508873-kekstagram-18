@@ -52,23 +52,17 @@
   };
 
   /**
-   * Функция поиска дубликатов
-   * @param {array} hashtags - массив строк хэш-тегов
-   * @return {boolean} флаг, который показывает был ли найден дубликат
+   * Функция проверки массива на наличие дубликатов
+   * @param {Array} array - входной массив
+   * @return {boolean} - возвращает true если элементы массива уникальны,
+   * false - если элементы дублируются
    */
-  var searchForDuplicate = function (hashtags) {
-    var duplicateFlag = false;
+  var isUnique = function (array) {
+    var newArray = array.slice().filter(function (item, index, arr) {
+      return arr.indexOf(item) === index;
+    });
 
-    for (var i = 0; i < hashtags.length; i++) {
-      for (var j = i + 1; j < hashtags.length; j++) {
-        if (hashtags[i].indexOf(hashtags[j]) > -1) {
-          duplicateFlag = true;
-          return duplicateFlag;
-        }
-      }
-    }
-
-    return duplicateFlag;
+    return array.length === newArray.length;
   };
 
   /**
@@ -84,7 +78,7 @@
         hashtagInput.setCustomValidity('Хэш-тег не может состоять из одного символа #');
       } else if (hashtags[i].indexOf('#', 1) > -1) {
         hashtagInput.setCustomValidity('Хэш-теги должны быть разделены пробелом');
-      } else if (searchForDuplicate(hashtags)) {
+      } else if (!isUnique(hashtags)) {
         hashtagInput.setCustomValidity('Один и тот же хэш-тег не может быть использован дважды');
       } else if (hashtags.length > MAX_HASHTAGS) {
         hashtagInput.setCustomValidity('Максимальное число тегов: ' + MAX_HASHTAGS);
@@ -162,7 +156,7 @@
   });
 
   /* Обработчик валидации поля с хэш-тегами */
-  hashtagInput.addEventListener('change', function () {
+  hashtagInput.addEventListener('input', function () {
     validateHashtags();
   });
 

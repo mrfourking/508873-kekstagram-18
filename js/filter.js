@@ -1,185 +1,82 @@
 'use strict';
 
 (function () {
+  var RANDOM_PHOTO_NUMBER = 10;
 
-  var SCALE_STEP = 25;
-  var MIN_SCALE = 25;
-  var MAX_SCALE = 100;
-  var MAX_BLUR_VALUE = 3;
-  var BRIGHTNESS_RANGE = 2;
-  var MIN_BRIGHTNESS_VALUE = 1;
-
-  /* Инициализация блока предпросмотра изображения */
-  var imagePreview = window.form.editFileForm
-    .querySelector('.img-upload__preview img');
-
-  /* Инициализация элементов масштабирования изображения */
-  var smallerScaleButton = window.form.editFileForm
-    .querySelector('.scale__control--smaller');
-  var biggerScaleButton = window.form.editFileForm
-    .querySelector('.scale__control--bigger');
-  var scaleField = window.form.editFileForm
-    .querySelector('.scale__control--value');
-
-  /* Инициализация элементов работы с фильтрами */
-  var effectButtons = window.form.editFileForm
-    .querySelectorAll('.effects__radio');
-  var effectlevelBar = window.form.effectLevel
-    .querySelector('.effect-level__line');
-  var effectLevelButton = window.form.effectLevel
-    .querySelector('.effect-level__pin');
-  var effectlevelFillBar = window.form.effectLevel
-    .querySelector('.effect-level__depth');
-  var currentEffect;
-  var bar;
-  var barLength;
-  /**
-   * Функция масштабирования изображения
-   * @param {boolean} positiveFlag - флаг нажатия кнопок уменьшения/увеличения
-   */
-  var setImageScale = function (positiveFlag) {
-    var currentScale = Number.parseInt(scaleField.value, 10);
-
-    if (positiveFlag && (currentScale + SCALE_STEP) <= MAX_SCALE) {
-      scaleField.value = (currentScale + SCALE_STEP) + '%';
-      imagePreview.style.transform = 'scale(' + (currentScale + SCALE_STEP) / 100 + ')';
-    }
-
-    if (!positiveFlag && (currentScale - SCALE_STEP) >= MIN_SCALE) {
-      scaleField.value = (currentScale - SCALE_STEP) + '%';
-      imagePreview.style.transform = 'scale(' + (currentScale - SCALE_STEP) / 100 + ')';
-    }
-  };
+  var filterButtons = window.render.pictureFilter.querySelectorAll('.img-filters__button');
 
   /**
-   * Функция выбора фильтра
+   * Функция отображения нажатой кнопки в фильтре изображений
+   * @param {string} pressedButtonId - id нажатой кнопки
    */
-  var onChangeSelectFilter = function () {
-    imagePreview.style.filter = '';
-
-    for (i = 0; i < effectButtons.length; i++) {
-      if (effectButtons[i].checked) {
-        imagePreview.classList.remove('effects__preview--' + currentEffect);
-        currentEffect = effectButtons[i].value;
-        if (currentEffect !== 'none') {
-          window.form.effectLevel.classList.remove('hidden');
-          bar = effectlevelBar.getBoundingClientRect();
-          barLength = bar.right - bar.left;
-          imagePreview.classList.add('effects__preview--' + currentEffect);
-          effectLevelButton.style.left = barLength + 'px';
-          effectlevelFillBar.style.width = '100%';
-          window.form.effectInput.value = '100';
-        } else {
-          window.form.effectLevel.classList.add('hidden');
-          window.form.effectInput.value = '0';
-        }
+  var setFilterButtonPressed = function (pressedButtonId) {
+    for (var i = 0; i < filterButtons.length; i++) {
+      if (filterButtons[i].id === pressedButtonId) {
+        filterButtons[i].classList.add('img-filters__button--active');
+      } else {
+        filterButtons[i].classList.remove('img-filters__button--active');
       }
     }
   };
 
   /**
-   * Функция подсчета интенсивности эффекта
-   * @return {number} процент, на который передвинут ползунок
-   * интенсивности эффекта
+   * Функция отрисовки 10 случайных фото из массива
    */
-  var countEffectLevel = function () {
-    var pin = effectLevelButton.getBoundingClientRect();
-    var pinOffset = pin.left - bar.left;
+  var renderRandomPhotos = function () {
+    var randomPhotos = [];
+    var arr = window.util.shuffleArray(window.render.defaultPhotos.slice());
 
-    return Math.round((pinOffset / barLength + 0.02) * 100);
-  };
-
-  /**
-   * Функция установки интенсивности эффекта на изображении
-   */
-  var setEffectLevel = function () {
-    window.form.effectInput.value = countEffectLevel();
-
-    var effect = window.getComputedStyle(imagePreview).filter.split('(', 1);
-
-    switch (effect[0]) {
-      case 'grayscale':
-        effect += '(' + window.form.effectInput.value + '%)';
-        imagePreview.style.filter = effect;
-        break;
-      case 'sepia':
-        effect += '(' + window.form.effectInput.value + '%)';
-        imagePreview.style.filter = effect;
-        break;
-      case 'invert':
-        effect += '(' + window.form.effectInput.value + '%)';
-        imagePreview.style.filter = effect;
-        break;
-      case 'blur':
-        effect += '(' + (window.form.effectInput.value / 100 * MAX_BLUR_VALUE) + 'px)';
-        imagePreview.style.filter = effect;
-        break;
-      case 'brightness':
-        effect += '(' + (window.form.effectInput.value / 100 * BRIGHTNESS_RANGE + MIN_BRIGHTNESS_VALUE) + ')';
-        imagePreview.style.filter = effect;
-        break;
-    }
-  };
-
-  /**
-   * Функция обработчика нажатия на ползунок изменения интенсивности эффекта
-   * @param {object} evt - объект Event
-   */
-  var onEffectPinMouseDown = function (evt) {
-    evt.preventDefault();
-
-    document.addEventListener('mousemove', onEffectPinMouseMove);
-    document.addEventListener('mouseup', onEffectPinMouseUp);
-  };
-
-  /**
-   * Функция обработчика перемещения мыши при нажатии на ползунок
-   * изменения интенсивности эффекта
-   * @param {object} evt - объект Event
-   */
-  var onEffectPinMouseMove = function (evt) {
-    bar = effectlevelBar.getBoundingClientRect();
-    barLength = bar.right - bar.left;
-
-    var shift = evt.clientX - bar.left;
-
-    if (shift > 0 && shift <= barLength) {
-      effectLevelButton.style.left = shift + 'px';
+    for (var i = 0; i < RANDOM_PHOTO_NUMBER; i++) {
+      randomPhotos.push(arr[i]);
     }
 
-    effectlevelFillBar.style.width = countEffectLevel() + '%';
-
-    setEffectLevel();
+    window.render.renderPhoto(randomPhotos);
   };
 
   /**
-   * Функция обработчика отпускания кнопки мыши после нажатия на
-   * ползунок изменения интенсивности эффекта
-   * @param {object} evt - объект Event
+   * Функция-callback для сортировки фото по убыванию комментариев
+   * @param {Object} left - объект с параметрами фотографии
+   * @param {Object} right - объект с параметрами фотографии
+   * @return {Number} - число, разность между количеством соседних комментариев
    */
-  var onEffectPinMouseUp = function (evt) {
-    evt.preventDefault();
-
-    document.removeEventListener('mousemove', onEffectPinMouseMove);
-    document.removeEventListener('mouseup', onEffectPinMouseUp);
+  var compareComments = function (left, right) {
+    var diff = right.comments.length - left.comments.length;
+    return diff;
   };
 
-  /* Обработчики кнопок масштабирования изображения */
-  smallerScaleButton.addEventListener('click', function () {
-    var positiveFlag = false;
-    setImageScale(positiveFlag);
+  /**
+   * Функция отрисовки фото по количеству комментариев
+   */
+  var renderPhotosByComments = function () {
+    var arr = window.render.defaultPhotos.slice().sort(compareComments);
+    window.render.renderPhoto(arr);
+  };
+
+  /**
+   * Функция обработчика нажатия на кнопки фильтра изображений
+   * @param {Object} evt - объект Event
+   */
+  var onFilterButtonClick = window.util.debounce(function (evt) {
+    switch (evt.target.id) {
+      case 'filter-popular':
+        window.render.renderPhoto(window.render.defaultPhotos);
+        window.preview.initPreview();
+        break;
+      case 'filter-random':
+        renderRandomPhotos();
+        window.preview.initPreview();
+        break;
+      case 'filter-discussed':
+        renderPhotosByComments();
+        window.preview.initPreview();
+        break;
+    }
   });
 
-  biggerScaleButton.addEventListener('click', function () {
-    var positiveFlag = true;
-    setImageScale(positiveFlag);
-  });
-
-  /* Обработчики смены фильтра изображения */
-  for (var i = 0; i < effectButtons.length; i++) {
-    effectButtons[i].addEventListener('change', onChangeSelectFilter);
+  for (var i = 0; i < filterButtons.length; i++) {
+    filterButtons[i].addEventListener('click', function (evt) {
+      setFilterButtonPressed(evt.target.id);
+      onFilterButtonClick(evt);
+    });
   }
-
-  /* Обработчик нажатия на ползунок изменения интенсивности эффекта */
-  effectLevelButton.addEventListener('mousedown', onEffectPinMouseDown);
 })();
