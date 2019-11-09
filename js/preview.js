@@ -16,53 +16,57 @@
 
   /**
    * Функция загрузки дополнительных комментариев
+   * @param {Object[]} comments - массив объектов с текущими комментариями
+   * @return {function} возвращает функцию, которая выполнит приватные методы
    */
-  var showComments = function () {
-    var fragment = document.createDocumentFragment();
-    var children = Array.from(commentsList.children);
+  var showComments = function (comments) {
+    var privateCounter = 0;
 
-    /* Если разница между показанными комментариями и их общим
-      количеством больше заданной порции комментариев, то рендерим
-      еще одну порцию */
-    if (currentComments.length - children.length > COMMENTS_DEFAULT_NUMBER) {
-      currentComments.slice(children.length, children.length + COMMENTS_DEFAULT_NUMBER)
-        .forEach(function (item) {
-          var comment = commentElement.cloneNode(true);
+    /**
+     * Метод для установки счетчика открытых комментариев и
+     * сокрытия кнопки со счетчиком
+     */
+    var setCommentCounter = function () {
+      if (privateCounter <= comments.length) {
+        var str = commentCounter.innerHTML;
+        str = privateCounter + str.slice(str.indexOf(' '));
+        commentCounter.innerHTML = str;
+      } else {
+        commentCounter.classList.add('visually-hidden');
+        commentLoadButton.classList.add('visually-hidden');
+      }
+    };
 
-          comment.querySelector('.social__picture').src = item.avatar;
-          comment.querySelector('.social__picture').alt = item.name;
-          comment.querySelector('.social__text').textContent = item.message;
+    /**
+     * Метод отрисовки комментариев в окне полноэкранного просмотра фотографий
+     */
+    var renderComments = function () {
+      var fragment = document.createDocumentFragment();
 
-          fragment.appendChild(comment);
-        });
+      if (privateCounter <= comments.length) {
+        comments.slice(privateCounter, privateCounter + COMMENTS_DEFAULT_NUMBER)
+          .forEach(function (item) {
+            var comment = commentElement.cloneNode(true);
 
-      commentsList.appendChild(fragment);
+            comment.querySelector('.social__picture').src = item.avatar;
+            comment.querySelector('.social__picture').alt = item.name;
+            comment.querySelector('.social__text').textContent = item.message;
 
-      /* Прибавляем счетчик отображенных комментариев */
-      var str = commentCounter.innerHTML;
-      var index = str.indexOf(' ');
-      str = (children.length + COMMENTS_DEFAULT_NUMBER) + str.slice(index);
-      commentCounter.innerHTML = str;
+            fragment.appendChild(comment);
+          });
 
-    } else {
-      /* Если разница отображенных комментариев с их общим числом
-      меньше порции, то рендерим остаток и скрываем счетчик и кнопку
-      загрузки комментариев */
-      currentComments.slice(children.length, currentComments.length)
-        .forEach(function (item) {
-          var comment = commentElement.cloneNode(true);
-
-          comment.querySelector('.social__picture').src = item.avatar;
-          comment.querySelector('.social__picture').alt = item.name;
-          comment.querySelector('.social__text').textContent = item.message;
-
-          fragment.appendChild(comment);
-        });
+        privateCounter += COMMENTS_DEFAULT_NUMBER;
+        setCommentCounter();
+      }
 
       commentsList.appendChild(fragment);
-      commentLoadButton.classList.add('visually-hidden');
-      commentCounter.classList.add('visually-hidden');
-    }
+    };
+
+    return {
+      show: function () {
+        renderComments();
+      }
+    };
   };
 
   /**
@@ -72,7 +76,7 @@
   var showBigPicture = function (photo) {
     bigPictureElement.classList.remove('hidden');
 
-    currentComments = photo.comments;
+    currentComments = showComments(photo.comments);
 
     /* Удаляем комментарии по умолчанию */
     var children = Array.from(commentsList.children);
@@ -87,50 +91,11 @@
     bigPictureElement.querySelector('.comments-count').textContent = photo.comments.length;
     bigPictureElement.querySelector('.social__caption').textContent = photo.description;
 
-    var fragment = document.createDocumentFragment();
+    /* Отрисовываем первую порцию комментариев */
+    currentComments.show();
 
-    /* Если число комментариев меньше заданной порции, то рендерим
-    их и скрываем счетчик отображенных комментариев и кнопку загрузки */
-    if (currentComments.length <= COMMENTS_DEFAULT_NUMBER) {
-      currentComments.forEach(function (item) {
-        var comment = commentElement.cloneNode(true);
-
-        comment.querySelector('.social__picture').src = item.avatar;
-        comment.querySelector('.social__picture').alt = item.name;
-        comment.querySelector('.social__text').textContent = item.message;
-
-        fragment.appendChild(comment);
-      });
-
-      commentCounter.classList.add('visually-hidden');
-      commentLoadButton.classList.add('visually-hidden');
-
-    } else {
-      /* Если число комментариев больше заданной порции, то рендерим
-      первую порцию, задаем счетчик отображенных комментариев и
-      инициализируем обработчик нажатия на кнопку загрузки комментариев */
-      currentComments.slice(0, COMMENTS_DEFAULT_NUMBER)
-        .forEach(function (item) {
-          var comment = commentElement.cloneNode(true);
-
-          comment.querySelector('.social__picture').src = item.avatar;
-          comment.querySelector('.social__picture').alt = item.name;
-          comment.querySelector('.social__text').textContent = item.message;
-
-          fragment.appendChild(comment);
-        });
-
-      var str = commentCounter.innerHTML;
-      var index = str.indexOf(' ');
-      str = COMMENTS_DEFAULT_NUMBER + str.slice(index);
-      commentCounter.innerHTML = str;
-
-      /* обработчик нажатия на кнопку загрузки комментариев */
-      commentLoadButton.addEventListener('click', showComments);
-    }
-
-    /* Присоединяем фрагмент к блоку */
-    commentsList.appendChild(fragment);
+    /* обработчик нажатия на кнопку загрузки комментариев */
+    commentLoadButton.addEventListener('click', currentComments.show);
   };
 
   /**
@@ -142,7 +107,7 @@
     bigPictureElement.classList.add('hidden');
     bigCloseButton.removeEventListener('click', closeBigPicture);
     document.removeEventListener('keydown', onEscCloseBigPicture);
-    commentLoadButton.removeEventListener('click', showComments);
+    commentLoadButton.removeEventListener('click', currentComments.show);
   };
 
   /**
