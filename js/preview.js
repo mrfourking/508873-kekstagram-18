@@ -108,6 +108,8 @@
     bigCloseButton.removeEventListener('click', closeBigPicture);
     document.removeEventListener('keydown', onEscCloseBigPicture);
     commentLoadButton.removeEventListener('click', currentComments.show);
+
+    document.querySelector('body').classList.remove('modal-open');
   };
 
   /**
@@ -131,6 +133,7 @@
     return function (evt) {
       evt.preventDefault();
       showBigPicture(window.render.photos[i]);
+      document.querySelector('body').classList.add('modal-open');
 
       bigCloseButton.addEventListener('click', closeBigPicture);
       document.addEventListener('keydown', onEscCloseBigPicture);
