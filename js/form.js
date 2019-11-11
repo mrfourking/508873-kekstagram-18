@@ -31,8 +31,12 @@
    */
   var closeEditForm = function () {
     editFileForm.classList.add('hidden');
+
     document.removeEventListener('keydown', onEscCloseForm);
+
     uploadFile.value = '';
+    preview.style.transform = '';
+    preview.classList.value = '';
   };
 
   /**
