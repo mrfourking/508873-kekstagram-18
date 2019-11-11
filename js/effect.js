@@ -10,8 +10,7 @@
   var MIN_BRIGHTNESS_VALUE = 1;
 
   /* Инициализация блока предпросмотра изображения */
-  var imagePreview = window.form.editFileForm
-    .querySelector('.img-upload__preview img');
+  var imagePreview = window.form.preview;
 
   /* Инициализация элементов масштабирования изображения */
   var smallerScaleButton = window.form.editFileForm

@@ -3,11 +3,16 @@
 (function () {
   var MAX_HASHTAGS = 5;
   var MAX_HASHTAG_LENGTH = 20;
+  var FILE_TYPES = ['gif', 'jpg', 'jpeg', 'png'];
 
   /* Инициализация формы загрузки изображения */
-  var uploadFile = window.render.pictureBlock.querySelector('#upload-file');
-  var uploadFileForm = window.render.pictureBlock.querySelector('.img-upload__form');
-  var editFileForm = window.render.pictureBlock.querySelector('.img-upload__overlay');
+  var uploadFile = window.render.pictureBlock
+    .querySelector('#upload-file');
+  var uploadFileForm = window.render.pictureBlock
+    .querySelector('.img-upload__form');
+  var editFileForm = window.render.pictureBlock
+    .querySelector('.img-upload__overlay');
+  var preview = editFileForm.querySelector('.img-upload__preview img');
   var editCloseButton = editFileForm.querySelector('#upload-cancel');
   var effectLevel = editFileForm.querySelector('.effect-level');
   var effectInput = effectLevel.querySelector('.effect-level__value');
@@ -145,11 +150,33 @@
     document.addEventListener('click', onClickCloseSuccessBlock);
   };
 
+  /**
+   * Функция рендера загружаемого изображения в окно редактирования
+   */
+  var setUploadImage = function () {
+    var file = uploadFile.files[0];
+    var fileName = file.name.toLowerCase();
+
+    var matches = FILE_TYPES.some(function (it) {
+      return fileName.endsWith(it);
+    });
+
+    if (matches) {
+      var reader = new FileReader();
+
+      reader.addEventListener('load', function () {
+        preview.src = reader.result;
+      });
+
+      reader.readAsDataURL(file);
+    }
+
+    openEditForm();
+  };
+
   /* Обработчики событий открытия/закрытия
     формы загрузки изображений */
-  uploadFile.addEventListener('change', function () {
-    openEditForm();
-  });
+  uploadFile.addEventListener('change', setUploadImage);
 
   editCloseButton.addEventListener('click', function () {
     closeEditForm();
@@ -186,6 +213,8 @@
   window.form = {
     editFileForm: editFileForm,
     effectLevel: effectLevel,
-    effectInput: effectInput
+    effectInput: effectInput,
+    uploadFile: uploadFile,
+    preview: preview
   };
 })();
