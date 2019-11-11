@@ -83,18 +83,25 @@
     for (var i = 0; i < hashtags.length; i++) {
       if (hashtags[i][0] !== '#') {
         hashtagInput.setCustomValidity('Хэш-тег должен начинатсья с символа #');
+        hashtagInput.style.borderColor = 'red';
       } else if (hashtags[i].length === 1) {
         hashtagInput.setCustomValidity('Хэш-тег не может состоять из одного символа #');
+        hashtagInput.style.borderColor = 'red';
       } else if (hashtags[i].indexOf('#', 1) > -1) {
         hashtagInput.setCustomValidity('Хэш-теги должны быть разделены пробелом');
+        hashtagInput.style.borderColor = 'red';
       } else if (!isUnique(hashtags)) {
         hashtagInput.setCustomValidity('Один и тот же хэш-тег не может быть использован дважды');
+        hashtagInput.style.borderColor = 'red';
       } else if (hashtags.length > MAX_HASHTAGS) {
         hashtagInput.setCustomValidity('Максимальное число тегов: ' + MAX_HASHTAGS);
+        hashtagInput.style.borderColor = 'red';
       } else if (hashtags[i].length > MAX_HASHTAG_LENGTH) {
         hashtagInput.setCustomValidity('Максимальная длина хэш-тэга: ' + MAX_HASHTAG_LENGTH + ' символов');
+        hashtagInput.style.borderColor = 'red';
       } else {
         hashtagInput.setCustomValidity('');
+        hashtagInput.style.borderColor = 'rgb(238, 238, 238)';
       }
     }
   };
@@ -187,7 +194,7 @@
   });
 
   /* Обработчик валидации поля с хэш-тегами */
-  hashtagInput.addEventListener('input', function () {
+  hashtagInput.addEventListener('change', function () {
     validateHashtags();
   });
 
