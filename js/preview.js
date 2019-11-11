@@ -4,14 +4,14 @@
   var COMMENTS_DEFAULT_NUMBER = 5;
 
   /* Инициализация блока полноразмерного просмотра изображения*/
-  var pictures = window.render.pictureBlock.querySelectorAll('.picture');
-  var bigPictureElement = document.querySelector('.big-picture');
-  var bigCloseButton = bigPictureElement.querySelector('.big-picture__cancel');
+  var bigPictureBlock = document.querySelector('.big-picture');
+  var bigCloseButton = bigPictureBlock.querySelector('.big-picture__cancel');
   var commentsList = document.querySelector('.social__comments');
   var commentElement = commentsList.querySelector('.social__comment');
-  var commentLoadButton = bigPictureElement.querySelector('.comments-loader');
-  var commentCounter = bigPictureElement.querySelector('.social__comment-count');
+  var commentLoadButton = bigPictureBlock.querySelector('.comments-loader');
+  var commentCounter = bigPictureBlock.querySelector('.social__comment-count');
 
+  var pictures;
   var currentComments;
 
   /**
@@ -74,7 +74,7 @@
    * @param {object} photo - объект с полями информации о большой фотографии
    */
   var showBigPicture = function (photo) {
-    bigPictureElement.classList.remove('hidden');
+    bigPictureBlock.classList.remove('hidden');
 
     currentComments = showComments(photo.comments);
 
@@ -86,10 +86,10 @@
     });
 
     /* Заполняем элемент контентом */
-    bigPictureElement.querySelector('.big-picture__img img').src = photo.url;
-    bigPictureElement.querySelector('.likes-count').textContent = photo.likes;
-    bigPictureElement.querySelector('.comments-count').textContent = photo.comments.length;
-    bigPictureElement.querySelector('.social__caption').textContent = photo.description;
+    bigPictureBlock.querySelector('.big-picture__img img').src = photo.url;
+    bigPictureBlock.querySelector('.likes-count').textContent = photo.likes;
+    bigPictureBlock.querySelector('.comments-count').textContent = photo.comments.length;
+    bigPictureBlock.querySelector('.social__caption').textContent = photo.description;
 
     /* Отрисовываем первую порцию комментариев */
     currentComments.show();
@@ -104,7 +104,8 @@
   var closeBigPicture = function () {
     commentCounter.classList.remove('visually-hidden');
     commentLoadButton.classList.remove('visually-hidden');
-    bigPictureElement.classList.add('hidden');
+    bigPictureBlock.classList.add('hidden');
+
     bigCloseButton.removeEventListener('click', closeBigPicture);
     document.removeEventListener('keydown', onEscCloseBigPicture);
     commentLoadButton.removeEventListener('click', currentComments.show);

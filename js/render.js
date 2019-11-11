@@ -55,13 +55,13 @@
   /**
    * Функция обработчика закрытия блока с ошибкой
    */
-  var closeErrorBlock = function () {
+  var onCloseErrorBlock = function () {
     var errorBlock = mainBlock.querySelector('.error');
     var errorButtons = errorBlock.querySelectorAll('.error__button');
     mainBlock.removeChild(errorBlock);
 
     for (var i = 0; i < errorButtons.length; i++) {
-      errorButtons[i].removeEventListener('click', closeErrorBlock);
+      errorButtons[i].removeEventListener('click', onCloseErrorBlock);
     }
     document.removeEventListener('keydown', onEscCloseErrorBlock, true);
     document.removeEventListener('click', onClickCloseErrorBlock);
@@ -73,7 +73,7 @@
    */
   var onEscCloseErrorBlock = function (evt) {
     if (evt.keyCode === window.util.ESC_KEYCODE) {
-      closeErrorBlock();
+      onCloseErrorBlock();
       evt.stopPropagation();
     }
   };
@@ -86,7 +86,7 @@
   var onClickCloseErrorBlock = function (evt) {
     var innerErrorBlock = mainBlock.querySelector('.error__inner');
     if (evt.target !== innerErrorBlock && !(innerErrorBlock.contains(evt.target))) {
-      closeErrorBlock();
+      onCloseErrorBlock();
     }
   };
 
@@ -104,7 +104,7 @@
     mainBlock.appendChild(errorBlock);
 
     for (var i = 0; i < errorButtons.length; i++) {
-      errorButtons[i].addEventListener('click', closeErrorBlock);
+      errorButtons[i].addEventListener('click', onCloseErrorBlock);
     }
 
     document.addEventListener('keydown', onEscCloseErrorBlock, true);
