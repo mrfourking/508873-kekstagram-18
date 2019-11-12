@@ -13,15 +13,15 @@
   var imagePreview = window.form.preview;
 
   /* Инициализация элементов масштабирования изображения */
-  var smallerScaleButton = window.form.editFileForm
+  var smallerScaleButton = window.form.editFile
     .querySelector('.scale__control--smaller');
-  var biggerScaleButton = window.form.editFileForm
+  var biggerScaleButton = window.form.editFile
     .querySelector('.scale__control--bigger');
-  var scaleField = window.form.editFileForm
+  var scaleField = window.form.editFile
     .querySelector('.scale__control--value');
 
   /* Инициализация элементов работы с фильтрами */
-  var effectButtons = window.form.editFileForm
+  var effectButtons = window.form.editFile
     .querySelectorAll('.effects__radio');
   var effectlevelBar = window.form.effectLevel
     .querySelector('.effect-level__line');
@@ -57,10 +57,10 @@
   var onChangeSelectFilter = function () {
     imagePreview.style.filter = '';
 
-    for (i = 0; i < effectButtons.length; i++) {
-      if (effectButtons[i].checked) {
+    effectButtons.forEach(function (item) {
+      if (item.checked) {
         imagePreview.classList.remove('effects__preview--' + currentEffect);
-        currentEffect = effectButtons[i].value;
+        currentEffect = item.value;
         if (currentEffect !== 'none') {
           window.form.effectLevel.classList.remove('hidden');
           bar = effectlevelBar.getBoundingClientRect();
@@ -74,7 +74,7 @@
           window.form.effectInput.value = '0';
         }
       }
-    }
+    });
   };
 
   /**
@@ -176,9 +176,9 @@
   });
 
   /* Обработчики смены фильтра изображения */
-  for (var i = 0; i < effectButtons.length; i++) {
-    effectButtons[i].addEventListener('change', onChangeSelectFilter);
-  }
+  effectButtons.forEach(function (item) {
+    item.addEventListener('change', onChangeSelectFilter);
+  });
 
   /* Обработчик нажатия на ползунок изменения интенсивности эффекта */
   effectLevelButton.addEventListener('mousedown', onEffectPinMouseDown);

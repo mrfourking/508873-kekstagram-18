@@ -145,20 +145,20 @@
    * Функция инициализации обработчиков для показа полноразмерного
    * изображения
    */
-  var initPreview = function () {
+  var init = function () {
 
     /* Ищем все сгенерированные изображения в разметке и
       вешает на них обработчики для открытия окна с большим фото */
     pictures = window.render.pictureBlock.querySelectorAll('.picture');
 
-    for (var i = 0; i < pictures.length; i++) {
-      pictures[i].addEventListener('click', onSmallPictureClick(i));
-    }
+    pictures.forEach(function (item, index) {
+      item.addEventListener('click', onSmallPictureClick(index));
+    });
   };
 
-  setTimeout(initPreview, 1000);
+  setTimeout(init, 1000);
 
   window.preview = {
-    initPreview: initPreview
+    init: init
   };
 })();

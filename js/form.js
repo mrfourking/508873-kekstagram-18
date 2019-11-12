@@ -10,16 +10,16 @@
     .querySelector('#upload-file');
   var uploadFileForm = window.render.pictureBlock
     .querySelector('.img-upload__form');
-  var editFileForm = window.render.pictureBlock
+  var editFile = window.render.pictureBlock
     .querySelector('.img-upload__overlay');
-  var preview = editFileForm.querySelector('.img-upload__preview img');
-  var editCloseButton = editFileForm.querySelector('#upload-cancel');
-  var effectLevel = editFileForm.querySelector('.effect-level');
+  var preview = editFile.querySelector('.img-upload__preview img');
+  var editCloseButton = editFile.querySelector('#upload-cancel');
+  var effectLevel = editFile.querySelector('.effect-level');
   var effectInput = effectLevel.querySelector('.effect-level__value');
 
   /* Инициализация поля ввода хэш-тега и комментариев*/
-  var hashtagInput = editFileForm.querySelector('.text__hashtags');
-  var commentTextArea = editFileForm.querySelector('.text__description');
+  var hashtagInput = editFile.querySelector('.text__hashtags');
+  var commentTextArea = editFile.querySelector('.text__description');
 
   var successTemplate = document.querySelector('#success')
     .content
@@ -30,7 +30,7 @@
    * @param {object} evt - объект Event
    */
   var closeEditForm = function () {
-    editFileForm.classList.add('hidden');
+    editFile.classList.add('hidden');
 
     document.removeEventListener('keydown', onEscCloseForm);
 
@@ -54,7 +54,7 @@
    * @param {object} evt - объект Event
    */
   var openEditForm = function () {
-    editFileForm.classList.remove('hidden');
+    editFile.classList.remove('hidden');
     effectInput.value = '0';
     document.addEventListener('keydown', onEscCloseForm);
     effectLevel.classList.add('hidden');
@@ -66,7 +66,7 @@
    * @return {boolean} - возвращает true если элементы массива уникальны,
    * false - если элементы дублируются
    */
-  var isUnique = function (array) {
+  var searchForDuplicates = function (array) {
     var newArray = array.slice().filter(function (item, index, arr) {
       return arr.indexOf(item) === index;
     });
@@ -80,30 +80,30 @@
   var validateHashtags = function () {
     var hashtags = hashtagInput.value.toLowerCase().split(' ');
 
-    for (var i = 0; i < hashtags.length; i++) {
-      if (hashtags[i][0] !== '#') {
+    hashtags.forEach(function (item, index, arr) {
+      if (item[0] !== '#') {
         hashtagInput.setCustomValidity('Хэш-тег должен начинатсья с символа #');
         hashtagInput.style.borderColor = 'red';
-      } else if (hashtags[i].length === 1) {
+      } else if (item.length === 1) {
         hashtagInput.setCustomValidity('Хэш-тег не может состоять из одного символа #');
         hashtagInput.style.borderColor = 'red';
-      } else if (hashtags[i].indexOf('#', 1) > -1) {
+      } else if (item.indexOf('#', 1) > -1) {
         hashtagInput.setCustomValidity('Хэш-теги должны быть разделены пробелом');
         hashtagInput.style.borderColor = 'red';
-      } else if (!isUnique(hashtags)) {
+      } else if (!searchForDuplicates(arr)) {
         hashtagInput.setCustomValidity('Один и тот же хэш-тег не может быть использован дважды');
         hashtagInput.style.borderColor = 'red';
-      } else if (hashtags.length > MAX_HASHTAGS) {
+      } else if (arr.length > MAX_HASHTAGS) {
         hashtagInput.setCustomValidity('Максимальное число тегов: ' + MAX_HASHTAGS);
         hashtagInput.style.borderColor = 'red';
-      } else if (hashtags[i].length > MAX_HASHTAG_LENGTH) {
+      } else if (item.length > MAX_HASHTAG_LENGTH) {
         hashtagInput.setCustomValidity('Максимальная длина хэш-тэга: ' + MAX_HASHTAG_LENGTH + ' символов');
         hashtagInput.style.borderColor = 'red';
       } else {
         hashtagInput.setCustomValidity('');
         hashtagInput.style.borderColor = 'rgb(238, 238, 238)';
       }
-    }
+    });
   };
 
   /**
@@ -222,7 +222,7 @@
   });
 
   window.form = {
-    editFileForm: editFileForm,
+    editFile: editFile,
     effectLevel: effectLevel,
     effectInput: effectInput,
     uploadFile: uploadFile,

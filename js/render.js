@@ -16,7 +16,7 @@
    * Функция отрисовки фотографий на странице
    * @param {Object[]} photos - массив объектов с параметрами фотографий
    */
-  var renderPhoto = function (photos) {
+  var initPhoto = function (photos) {
     if (!window.render.defaultPhotos) {
       window.render.defaultPhotos = photos;
     }
@@ -37,15 +37,15 @@
 
     /* Клонируем содержимое шаблона, добавляем данные из массива
       объектов и записываем получившийся блок во фрагмент */
-    for (var i = 0; i < photos.length; i++) {
+    photos.forEach(function (item) {
       var picture = pictureTemplate.cloneNode(true);
 
-      picture.querySelector('.picture__img').src = photos[i].url;
-      picture.querySelector('.picture__likes').textContent = photos[i].likes;
-      picture.querySelector('.picture__comments').textContent = photos[i].comments.length;
+      picture.querySelector('.picture__img').src = item.url;
+      picture.querySelector('.picture__likes').textContent = item.likes;
+      picture.querySelector('.picture__comments').textContent = item.comments.length;
 
       fragment.appendChild(picture);
-    }
+    });
 
     /* Присоединяем готовый фрагмент к блоку picture */
     pictureBlock.appendChild(fragment);
@@ -60,9 +60,10 @@
     var errorButtons = errorBlock.querySelectorAll('.error__button');
     mainBlock.removeChild(errorBlock);
 
-    for (var i = 0; i < errorButtons.length; i++) {
-      errorButtons[i].removeEventListener('click', onCloseErrorBlock);
-    }
+    errorButtons.forEach(function (item) {
+      item.removeEventListener('click', onCloseErrorBlock);
+    });
+
     document.removeEventListener('keydown', onEscCloseErrorBlock, true);
     document.removeEventListener('click', onClickCloseErrorBlock);
   };
@@ -103,22 +104,22 @@
 
     mainBlock.appendChild(errorBlock);
 
-    for (var i = 0; i < errorButtons.length; i++) {
-      errorButtons[i].addEventListener('click', onCloseErrorBlock);
-    }
+    errorButtons.forEach(function (item) {
+      item.addEventListener('click', onCloseErrorBlock);
+    });
 
     document.addEventListener('keydown', onEscCloseErrorBlock, true);
     document.addEventListener('click', onClickCloseErrorBlock);
   };
 
 
-  window.network.loadData(renderPhoto, onError);
+  window.network.loadData(initPhoto, onError);
 
   window.render = {
     pictureBlock: pictureBlock,
     onError: onError,
     mainBlock: mainBlock,
     pictureFilter: pictureFilter,
-    renderPhoto: renderPhoto
+    initPhoto: initPhoto
   };
 })();

@@ -20,12 +20,12 @@
    * @return {Array} возвращает массив с перемешанными элементами
    */
   var shuffleArray = function (arr) {
-    for (var i = arr.length - 1; i > 0; i--) {
-      var j = Math.floor(Math.random() * (i + 1));
-      var tmp = arr[i];
-      arr[i] = arr[j];
-      arr[j] = tmp;
-    }
+    arr.forEach(function (item, index, array) {
+      var j = getRandomElement(index, array.length);
+      var temp = item;
+      array[index] = array[j];
+      array[j] = temp;
+    });
 
     return arr;
   };

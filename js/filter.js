@@ -10,13 +10,13 @@
    * @param {string} pressedButtonId - id нажатой кнопки
    */
   var setFilterButtonPressed = function (pressedButtonId) {
-    for (var i = 0; i < filterButtons.length; i++) {
-      if (filterButtons[i].id === pressedButtonId) {
-        filterButtons[i].classList.add('img-filters__button--active');
+    filterButtons.forEach(function (item) {
+      if (item.id === pressedButtonId) {
+        item.classList.add('img-filters__button--active');
       } else {
-        filterButtons[i].classList.remove('img-filters__button--active');
+        item.classList.remove('img-filters__button--active');
       }
-    }
+    });
   };
 
   /**
@@ -24,13 +24,13 @@
    */
   var renderRandomPhotos = function () {
     var randomPhotos = [];
-    var arr = window.util.shuffleArray(window.render.defaultPhotos.slice());
+    var mixedPhotos = window.util.shuffleArray(window.render.defaultPhotos.slice());
 
-    for (var i = 0; i < RANDOM_PHOTO_NUMBER; i++) {
-      randomPhotos.push(arr[i]);
-    }
+    mixedPhotos.slice(0, RANDOM_PHOTO_NUMBER).forEach(function (item) {
+      randomPhotos.push(item);
+    });
 
-    window.render.renderPhoto(randomPhotos);
+    window.render.initPhoto(randomPhotos);
   };
 
   /**
@@ -47,9 +47,9 @@
   /**
    * Функция отрисовки фото по количеству комментариев
    */
-  var renderPhotosByComments = function () {
+  var initPhotosByComments = function () {
     var arr = window.render.defaultPhotos.slice().sort(compareComments);
-    window.render.renderPhoto(arr);
+    window.render.initPhoto(arr);
   };
 
   /**
@@ -59,24 +59,24 @@
   var onFilterButtonClick = window.util.debounce(function (evt) {
     switch (evt.target.id) {
       case 'filter-popular':
-        window.render.renderPhoto(window.render.defaultPhotos);
-        window.preview.initPreview();
+        window.render.initPhoto(window.render.defaultPhotos);
+        window.preview.init();
         break;
       case 'filter-random':
         renderRandomPhotos();
-        window.preview.initPreview();
+        window.preview.init();
         break;
       case 'filter-discussed':
-        renderPhotosByComments();
-        window.preview.initPreview();
+        initPhotosByComments();
+        window.preview.init();
         break;
     }
   });
 
-  for (var i = 0; i < filterButtons.length; i++) {
-    filterButtons[i].addEventListener('click', function (evt) {
+  filterButtons.forEach(function (item) {
+    item.addEventListener('click', function (evt) {
       setFilterButtonPressed(evt.target.id);
       onFilterButtonClick(evt);
     });
-  }
+  });
 })();
