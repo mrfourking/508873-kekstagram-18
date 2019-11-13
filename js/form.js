@@ -4,6 +4,7 @@
   var MAX_HASHTAGS = 5;
   var MAX_HASHTAG_LENGTH = 20;
   var FILE_TYPES = ['gif', 'jpg', 'jpeg', 'png'];
+  var PREVIEW_DEFAULT_URL = 'img/upload-default-image.jpg';
 
   /* Инициализация формы загрузки изображения */
   var uploadFile = window.render.pictureBlock
@@ -32,19 +33,24 @@
   var closeEditForm = function () {
     editFile.classList.add('hidden');
 
-    document.removeEventListener('keydown', onEscCloseForm);
+    document.removeEventListener('keydown', onUploadFileFormKeydown);
 
+    /* Сбрасываем значения формы */
     uploadFile.value = '';
-    preview.style.transform = '';
-    preview.classList.value = '';
+    preview.removeAttribute('style');
+    preview.removeAttribute('class');
+    preview.src = PREVIEW_DEFAULT_URL;
+    effectInput.setAttribute('value', 0);
+
+    uploadFileForm.reset();
   };
 
   /**
    * Функция закрытия формы загрузки изображений по нажатию на Esc
    * @param {object} evt - объект Event
    */
-  var onEscCloseForm = function (evt) {
-    if (evt.keyCode === window.util.ESC_KEYCODE) {
+  var onUploadFileFormKeydown = function (evt) {
+    if (window.util.isEscPressed(evt)) {
       closeEditForm();
     }
   };
@@ -55,8 +61,8 @@
    */
   var openEditForm = function () {
     editFile.classList.remove('hidden');
-    effectInput.value = '0';
-    document.addEventListener('keydown', onEscCloseForm);
+    effectInput.setAttribute('value', 0);
+    document.addEventListener('keydown', onUploadFileFormKeydown);
     effectLevel.classList.add('hidden');
   };
 
@@ -67,8 +73,8 @@
    * false - если элементы дублируются
    */
   var searchForDuplicates = function (array) {
-    var newArray = array.slice().filter(function (item, index, arr) {
-      return arr.indexOf(item) === index;
+    var newArray = array.slice().filter(function (item, index, innerArray) {
+      return innerArray.indexOf(item) === index;
     });
 
     return array.length === newArray.length;
@@ -80,7 +86,7 @@
   var validateHashtags = function () {
     var hashtags = hashtagInput.value.toLowerCase().split(' ');
 
-    hashtags.forEach(function (item, index, arr) {
+    hashtags.forEach(function (item, index, innerArray) {
       if (item[0] !== '#') {
         hashtagInput.setCustomValidity('Хэш-тег должен начинатсья с символа #');
         hashtagInput.style.borderColor = 'red';
@@ -90,10 +96,10 @@
       } else if (item.indexOf('#', 1) > -1) {
         hashtagInput.setCustomValidity('Хэш-теги должны быть разделены пробелом');
         hashtagInput.style.borderColor = 'red';
-      } else if (!searchForDuplicates(arr)) {
+      } else if (!searchForDuplicates(innerArray)) {
         hashtagInput.setCustomValidity('Один и тот же хэш-тег не может быть использован дважды');
         hashtagInput.style.borderColor = 'red';
-      } else if (arr.length > MAX_HASHTAGS) {
+      } else if (innerArray.length > MAX_HASHTAGS) {
         hashtagInput.setCustomValidity('Максимальное число тегов: ' + MAX_HASHTAGS);
         hashtagInput.style.borderColor = 'red';
       } else if (item.length > MAX_HASHTAG_LENGTH) {
@@ -114,11 +120,13 @@
     var successButton = successBlock.querySelector('.success__button');
     window.render.mainBlock.removeChild(successBlock);
 
-    document.removeEventListener('keydown', onEscCloseSuccessBlock);
-    successButton.removeEventListener('click', closeSuccessBlock);
-    document.removeEventListener('click', onClickCloseSuccessBlock);
+    document.removeEventListener('keydown', onSuccessBlockKeydown);
+    successButton.removeEventListener('click', onSuccessButtonClick);
+    document.removeEventListener('click', onSuccessBlockClick);
+  };
 
-    uploadFileForm.reset();
+  var onSuccessButtonClick = function () {
+    closeSuccessBlock();
   };
 
   /**
@@ -126,8 +134,8 @@
    * по нажатию на кнопку Esc
    * @param {Object} evt - объект Event
    */
-  var onEscCloseSuccessBlock = function (evt) {
-    if (evt.keyCode === window.util.ESC_KEYCODE) {
+  var onSuccessBlockKeydown = function (evt) {
+    if (window.util.isEscPressed(evt)) {
       closeSuccessBlock();
     }
   };
@@ -137,7 +145,7 @@
    * при клике по произвольной области вне окна
    * @param {Object} evt - объект Event
    */
-  var onClickCloseSuccessBlock = function (evt) {
+  var onSuccessBlockClick = function (evt) {
     var innerSuccessBlock = window.render.mainBlock.querySelector('.success__inner');
     if (evt.target !== innerSuccessBlock && !(innerSuccessBlock.contains(evt.target))) {
       closeSuccessBlock();
@@ -156,23 +164,23 @@
 
     window.render.mainBlock.appendChild(successBlock);
 
-    document.addEventListener('keydown', onEscCloseSuccessBlock);
-    successButton.addEventListener('click', closeSuccessBlock);
-    document.addEventListener('click', onClickCloseSuccessBlock);
+    document.addEventListener('keydown', onSuccessBlockKeydown);
+    successButton.addEventListener('click', onSuccessButtonClick);
+    document.addEventListener('click', onSuccessBlockClick);
   };
 
   /**
    * Функция рендера загружаемого изображения в окно редактирования
    */
-  var setUploadImage = function () {
+  var onUploadFileChange = function () {
     var file = uploadFile.files[0];
     var fileName = file.name.toLowerCase();
 
-    var matches = FILE_TYPES.some(function (it) {
-      return fileName.endsWith(it);
+    var imageFileType = FILE_TYPES.some(function (item) {
+      return fileName.endsWith(item);
     });
 
-    if (matches) {
+    if (imageFileType) {
       var reader = new FileReader();
 
       reader.addEventListener('load', function () {
@@ -187,7 +195,7 @@
 
   /* Обработчики событий открытия/закрытия
     формы загрузки изображений */
-  uploadFile.addEventListener('change', setUploadImage);
+  uploadFile.addEventListener('change', onUploadFileChange);
 
   editCloseButton.addEventListener('click', function () {
     closeEditForm();
@@ -200,19 +208,19 @@
 
   /* Обработчики, прерывающие/восстанавливающие обработчик закрытия формы */
   hashtagInput.addEventListener('focus', function () {
-    document.removeEventListener('keydown', onEscCloseForm);
+    document.removeEventListener('keydown', onUploadFileFormKeydown);
   });
 
   hashtagInput.addEventListener('blur', function () {
-    document.addEventListener('keydown', onEscCloseForm);
+    document.addEventListener('keydown', onUploadFileFormKeydown);
   });
 
   commentTextArea.addEventListener('focus', function () {
-    document.removeEventListener('keydown', onEscCloseForm);
+    document.removeEventListener('keydown', onUploadFileFormKeydown);
   });
 
   commentTextArea.addEventListener('blur', function () {
-    document.addEventListener('keydown', onEscCloseForm);
+    document.addEventListener('keydown', onUploadFileFormKeydown);
   });
 
   /* Обработчик кнопки отправки формы */

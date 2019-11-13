@@ -40,35 +40,32 @@
    * @return {Number} - число, разность между количеством соседних комментариев
    */
   var compareComments = function (left, right) {
-    var diff = right.comments.length - left.comments.length;
-    return diff;
+    var difference = right.comments.length - left.comments.length;
+    return difference;
   };
 
   /**
    * Функция отрисовки фото по количеству комментариев
    */
   var initPhotosByComments = function () {
-    var arr = window.render.defaultPhotos.slice().sort(compareComments);
-    window.render.initPhoto(arr);
+    var array = window.render.defaultPhotos.slice().sort(compareComments);
+    window.render.initPhoto(array);
   };
 
   /**
    * Функция обработчика нажатия на кнопки фильтра изображений
    * @param {Object} evt - объект Event
    */
-  var onFilterButtonClick = window.util.debounce(function (evt) {
+  var filterPhotos = window.util.debounce(function (evt) {
     switch (evt.target.id) {
       case 'filter-popular':
         window.render.initPhoto(window.render.defaultPhotos);
-        window.preview.init();
         break;
       case 'filter-random':
         renderRandomPhotos();
-        window.preview.init();
         break;
       case 'filter-discussed':
         initPhotosByComments();
-        window.preview.init();
         break;
     }
   });
@@ -76,7 +73,7 @@
   filterButtons.forEach(function (item) {
     item.addEventListener('click', function (evt) {
       setFilterButtonPressed(evt.target.id);
-      onFilterButtonClick(evt);
+      filterPhotos(evt);
     });
   });
 })();

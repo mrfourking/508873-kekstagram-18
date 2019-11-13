@@ -16,18 +16,18 @@
 
   /**
    * Функция перемешивания элементов массива в случайном порядке
-   * @param {Array} arr - массив, который необходимо перемешать
+   * @param {Array} array - массив, который необходимо перемешать
    * @return {Array} возвращает массив с перемешанными элементами
    */
-  var shuffleArray = function (arr) {
-    arr.forEach(function (item, index, array) {
-      var j = getRandomElement(index, array.length);
+  var shuffleArray = function (array) {
+    array.forEach(function (item, index, newArray) {
+      var randomIndex = getRandomElement(index, newArray.length);
       var temp = item;
-      array[index] = array[j];
-      array[j] = temp;
+      newArray[index] = newArray[randomIndex];
+      newArray[randomIndex] = temp;
     });
 
-    return arr;
+    return array;
   };
 
   /**
@@ -51,7 +51,9 @@
   };
 
   window.util = {
-    ESC_KEYCODE: ESC_KEYCODE,
+    isEscPressed: function (evt) {
+      return evt.keyCode === ESC_KEYCODE;
+    },
     getRandomElement: getRandomElement,
     shuffleArray: shuffleArray,
     debounce: debounce

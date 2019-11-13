@@ -45,36 +45,48 @@
       picture.querySelector('.picture__comments').textContent = item.comments.length;
 
       fragment.appendChild(picture);
+
+      picture.addEventListener('click', function () {
+        window.preview.showBigPicture(item);
+      });
     });
 
     /* Присоединяем готовый фрагмент к блоку picture */
     pictureBlock.appendChild(fragment);
+
     pictureFilter.classList.remove('img-filters--inactive');
   };
 
   /**
-   * Функция обработчика закрытия блока с ошибкой
+   * Функция закрытия блока с ошибкой
    */
-  var onCloseErrorBlock = function () {
+  var сloseErrorBlock = function () {
     var errorBlock = mainBlock.querySelector('.error');
     var errorButtons = errorBlock.querySelectorAll('.error__button');
     mainBlock.removeChild(errorBlock);
 
     errorButtons.forEach(function (item) {
-      item.removeEventListener('click', onCloseErrorBlock);
+      item.removeEventListener('click', onErrorButtonClick);
     });
 
-    document.removeEventListener('keydown', onEscCloseErrorBlock, true);
-    document.removeEventListener('click', onClickCloseErrorBlock);
+    document.removeEventListener('keydown', onErrorBlockKeydown, true);
+    document.removeEventListener('click', onErrorBlockClick);
+  };
+
+  /**
+   * Функция обработчика нажатия на кнопки в блоке ошибок
+   */
+  var onErrorButtonClick = function () {
+    сloseErrorBlock();
   };
 
   /**
    * Функция закрытия блока с ошибкой по нажатию клавиши Esc
    * @param {Object} evt - объект Event
    */
-  var onEscCloseErrorBlock = function (evt) {
-    if (evt.keyCode === window.util.ESC_KEYCODE) {
-      onCloseErrorBlock();
+  var onErrorBlockKeydown = function (evt) {
+    if (window.util.isEscPressed(evt)) {
+      сloseErrorBlock();
       evt.stopPropagation();
     }
   };
@@ -84,10 +96,10 @@
    * области вне окна
    * @param {Object} evt - объект Event
    */
-  var onClickCloseErrorBlock = function (evt) {
+  var onErrorBlockClick = function (evt) {
     var innerErrorBlock = mainBlock.querySelector('.error__inner');
     if (evt.target !== innerErrorBlock && !(innerErrorBlock.contains(evt.target))) {
-      onCloseErrorBlock();
+      сloseErrorBlock();
     }
   };
 
@@ -105,11 +117,11 @@
     mainBlock.appendChild(errorBlock);
 
     errorButtons.forEach(function (item) {
-      item.addEventListener('click', onCloseErrorBlock);
+      item.addEventListener('click', onErrorButtonClick);
     });
 
-    document.addEventListener('keydown', onEscCloseErrorBlock, true);
-    document.addEventListener('click', onClickCloseErrorBlock);
+    document.addEventListener('keydown', onErrorBlockKeydown, true);
+    document.addEventListener('click', onErrorBlockClick);
   };
 
 
