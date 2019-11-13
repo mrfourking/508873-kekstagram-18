@@ -54,7 +54,7 @@
   /**
    * Функция выбора фильтра
    */
-  var onChangeSelectFilter = function () {
+  var onEffectButtonClick = function () {
     imagePreview.style.filter = '';
 
     effectButtons.forEach(function (item) {
@@ -68,10 +68,10 @@
           imagePreview.classList.add('effects__preview--' + currentEffect);
           effectLevelButton.style.left = barLength + 'px';
           effectlevelFillBar.style.width = '100%';
-          window.form.effectInput.value = '100';
+          window.form.effectInput.setAttribute('value', MAX_SCALE);
         } else {
           window.form.effectLevel.classList.add('hidden');
-          window.form.effectInput.value = '0';
+          window.form.effectInput.setAttribute('value', 0);
         }
       }
     });
@@ -93,7 +93,7 @@
    * Функция установки интенсивности эффекта на изображении
    */
   var setEffectLevel = function () {
-    window.form.effectInput.value = countEffectLevel();
+    window.form.effectInput.setAttribute('value', countEffectLevel());
 
     var effect = window.getComputedStyle(imagePreview).filter.split('(', 1);
 
@@ -177,7 +177,7 @@
 
   /* Обработчики смены фильтра изображения */
   effectButtons.forEach(function (item) {
-    item.addEventListener('change', onChangeSelectFilter);
+    item.addEventListener('change', onEffectButtonClick);
   });
 
   /* Обработчик нажатия на ползунок изменения интенсивности эффекта */

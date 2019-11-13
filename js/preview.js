@@ -7,11 +7,10 @@
   var bigPictureBlock = document.querySelector('.big-picture');
   var bigCloseButton = bigPictureBlock.querySelector('.big-picture__cancel');
   var commentsList = document.querySelector('.social__comments');
-  var commentElement = commentsList.querySelector('.social__comment');
+  var commentTemplate = commentsList.querySelector('.social__comment');
   var commentLoadButton = bigPictureBlock.querySelector('.comments-loader');
   var commentCounter = bigPictureBlock.querySelector('.social__comment-count');
 
-  var pictures;
   var currentComments;
 
   /**
@@ -27,10 +26,10 @@
      * сокрытия кнопки со счетчиком
      */
     var setCommentCounter = function () {
-      if (privateCounter <= comments.length) {
-        var str = commentCounter.innerHTML;
-        str = privateCounter + str.slice(str.indexOf(' '));
-        commentCounter.innerHTML = str;
+      if (privateCounter < comments.length) {
+        var counterString = commentCounter.innerHTML;
+        counterString = privateCounter + counterString.slice(counterString.indexOf(' '));
+        commentCounter.innerHTML = counterString;
       } else {
         commentCounter.classList.add('visually-hidden');
         commentLoadButton.classList.add('visually-hidden');
@@ -46,7 +45,7 @@
       if (privateCounter <= comments.length) {
         comments.slice(privateCounter, privateCounter + COMMENTS_DEFAULT_NUMBER)
           .forEach(function (item) {
-            var comment = commentElement.cloneNode(true);
+            var comment = commentTemplate.cloneNode(true);
 
             comment.querySelector('.social__picture').src = item.avatar;
             comment.querySelector('.social__picture').alt = item.name;
@@ -67,6 +66,13 @@
         renderComments();
       }
     };
+  };
+
+  /**
+   * Функция нажатия на кнопку загрузки комментариев
+   */
+  var onCommentButtonClick = function () {
+    currentComments.show();
   };
 
   /**
@@ -95,7 +101,12 @@
     currentComments.show();
 
     /* обработчик нажатия на кнопку загрузки комментариев */
-    commentLoadButton.addEventListener('click', currentComments.show);
+    commentLoadButton.addEventListener('click', onCommentButtonClick);
+
+    bigCloseButton.addEventListener('click', onBigCloseButtonClick);
+    document.addEventListener('keydown', onBigPictureKeydown);
+
+    document.body.classList.add('modal-open');
   };
 
   /**
@@ -106,59 +117,32 @@
     commentLoadButton.classList.remove('visually-hidden');
     bigPictureBlock.classList.add('hidden');
 
-    bigCloseButton.removeEventListener('click', closeBigPicture);
-    document.removeEventListener('keydown', onEscCloseBigPicture);
-    commentLoadButton.removeEventListener('click', currentComments.show);
+    bigCloseButton.removeEventListener('click', onBigCloseButtonClick);
+    document.removeEventListener('keydown', onBigPictureKeydown);
+    commentLoadButton.removeEventListener('click', onCommentButtonClick);
 
-    document.querySelector('body').classList.remove('modal-open');
+    document.body.classList.remove('modal-open');
+  };
+
+  /**
+   * Функция обработчика нажатия на кнопку закрытия
+   * блока полноэкранного просмотра
+   */
+  var onBigCloseButtonClick = function () {
+    closeBigPicture();
   };
 
   /**
    * Функция закрытия окна с большим изображением по нажатию на Esc
    * @param {object} evt - объект Event
    */
-  var onEscCloseBigPicture = function (evt) {
-    if (evt.keyCode === window.util.ESC_KEYCODE) {
+  var onBigPictureKeydown = function (evt) {
+    if (window.util.isEscPressed(evt)) {
       closeBigPicture();
     }
   };
 
-  /**
-   * Функция обертка обработчика, которая передает нужный индекс и
-   * запускает процесс отрисовки большого изображения
-   * @param {number} i - индекс нужного объекта в массиве photos
-   * с описанием фото
-   * @return {function} возвращает функцию обработчика
-   */
-  var onSmallPictureClick = function (i) {
-    return function (evt) {
-      evt.preventDefault();
-      showBigPicture(window.render.photos[i]);
-      document.querySelector('body').classList.add('modal-open');
-
-      bigCloseButton.addEventListener('click', closeBigPicture);
-      document.addEventListener('keydown', onEscCloseBigPicture);
-    };
-  };
-
-  /**
-   * Функция инициализации обработчиков для показа полноразмерного
-   * изображения
-   */
-  var init = function () {
-
-    /* Ищем все сгенерированные изображения в разметке и
-      вешает на них обработчики для открытия окна с большим фото */
-    pictures = window.render.pictureBlock.querySelectorAll('.picture');
-
-    pictures.forEach(function (item, index) {
-      item.addEventListener('click', onSmallPictureClick(index));
-    });
-  };
-
-  setTimeout(init, 1000);
-
   window.preview = {
-    init: init
+    showBigPicture: showBigPicture
   };
 })();
